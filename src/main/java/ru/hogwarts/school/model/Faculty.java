@@ -1,33 +1,41 @@
 package ru.hogwarts.school.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
 @Setter
 @Entity
+@Table(name = "faculty")
 public class Faculty {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-
     private Long id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "color", nullable = false)
     private String color;
 
-    public Faculty(Long id, String name, String color) {
-        this.id = id;
+    @OneToMany(mappedBy = "faculty") // ленивый по умолчанию
+    @JsonIgnore
+    private List<Student> students = new ArrayList<>();
+
+
+    public Faculty(String name, String color) {
         this.name = name;
         this.color = color;
     }
 
-    public Faculty () {
-
+    public Faculty() {
     }
 
     @Override

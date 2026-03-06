@@ -1,5 +1,6 @@
 package ru.hogwarts.school.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,7 +29,6 @@ public class SchoolControllerAdvice {
                 HttpStatus.NOT_FOUND.name(),
                 e.getMessage()
         );
-
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(error);
@@ -46,12 +46,10 @@ public class SchoolControllerAdvice {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(error);
     }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<String> handleConstraintViolation(ConstraintViolationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Ошибка валидации: " + ex.getMessage());
+    }
 }
-//@ExceptionHandler(IllegalArgumentException.class)
-//public ResponseEntity<ExamError> handleIllegalArgumentException(IllegalArgumentException e) {
-//    ExamError error = new ExamError("BAD_REQUEST", e.getMessage());
-//
-//    return ResponseEntity
-//            .status(HttpStatus.BAD_REQUEST)
-//            .body(error);
-//}

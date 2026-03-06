@@ -1,11 +1,13 @@
 package ru.hogwarts.school.controller;
 
+import jakarta.validation.constraints.Positive;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.List;
-
+//@Validated Включает проверку всех аннотаций @Positive, @Min, @Max в этом классе
 @RestController
 @RequestMapping("/student")
 public class StudentController {
@@ -15,30 +17,43 @@ public class StudentController {
     public StudentController(StudentService studentService) {
         this.studentService = studentService;
     }
-    @GetMapping ("{id}")
-    public Student getStudent (@PathVariable Long id) {
+
+    @GetMapping("{id}")
+    public Student getStudent(@PathVariable @Positive Long id) {
         return studentService.studentSearch(id);
     }
 
     @PostMapping
-    public Student createStudent (@RequestBody Student student) {
+    public Student createStudent(@RequestBody Student student) {
         return studentService.creteStudent(student);
     }
 
-    @PutMapping ("{id}")
-    public Student updateStudent (@PathVariable Long id,
-                                @RequestBody Student student) {
+    @PutMapping("{id}")
+    public Student updateStudent(@PathVariable @Positive Long id,
+                                 @RequestBody Student student) {
         student.setId(id);
         return studentService.updateStudent(student);
     }
 
-    @DeleteMapping ("{id}")
-    public Student deleteStudent (@PathVariable Long id) {
+    @DeleteMapping("{id}")
+    public Student deleteStudent(@PathVariable @Positive Long id) {
         return studentService.deleteStudent(id);
     }
 
     @GetMapping
-    public List <Student> getStudentsByAge (@RequestParam int age) {
+    public List<Student> getStudentsByAge(@RequestParam int age) {
         return studentService.findByAge(age);
     }
+
+    @GetMapping("/age")
+    public List<Student> getFindByAgeBetween(@RequestParam int from,
+                                             @RequestParam int to) {
+        return studentService.findByAgeBetween(from, to);
+    }
+
+    @PostMapping("info-faculty")
+    public Faculty getFacultyInfo(@RequestBody Student student) {
+        return studentService.getFacultyByStudentId(student);
+    }
+
 }

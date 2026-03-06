@@ -6,19 +6,19 @@ import ru.hogwarts.school.exception.StudentNotFound;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
+import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.List;
-
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class FacultyService {
     
     private final FacultyRepository facultyRepository;
+    private final StudentRepository studentRepository;
     
-    public FacultyService (FacultyRepository facultyRepository) {
+    public FacultyService (FacultyRepository facultyRepository, StudentRepository studentRepository) {
         this.facultyRepository = facultyRepository;
+        this.studentRepository = studentRepository;
     }
     
     public Faculty createFaculty (Faculty faculty) {
@@ -48,10 +48,22 @@ if (id == null) {
 
         facultyRepository.delete(facultyToDelete);
         return facultyToDelete;
-    }
 
-    public List<Faculty> findByColor (String color) {
-        return facultyRepository.findByColor(color);
     }
+    public List<Faculty> search(String name, String color) {
+        // Если пришел null, меняем на пустую строку "", чтобы база не ругалась
+        String searchName = (name == null) ? "" : name;
+        String searchColor = (color == null) ? "" : color;
 
+        return facultyRepository.findByRussianNameOrColor(searchName, searchColor);
+    }
+    public List <Faculty> findByNameOrColor (String name, String color) {
+        return facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color);
+    }
+    public List <Student> studentsFacultyById (Long facultyId) {
+        if (facultyId == null) {
+            throw new FacultyNotFound("Введите данные факультета для поиска");
+        }
+        return studentRepository.findByFaculty_Id(facultyId);
+    }
 }

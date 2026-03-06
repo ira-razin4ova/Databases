@@ -1,8 +1,12 @@
 package ru.hogwarts.school.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.exception.FacultyNotFound;
 import ru.hogwarts.school.exception.StudentNotFound;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.*;
@@ -13,12 +17,28 @@ import java.util.stream.Collectors;
 public class StudentService {
 
     private final StudentRepository studentRepository;
+    private final FacultyRepository facultyRepository;
 
-    public StudentService (StudentRepository studentRepository) {
+    public StudentService(StudentRepository studentRepository, FacultyRepository facultyRepository) {
         this.studentRepository = studentRepository;
+        this.facultyRepository = facultyRepository;
     }
 
     public Student creteStudent(Student student) {
+
+        if (student.getFaculty() == null || student.getFaculty().getId() == null) {
+            throw new FacultyNotFound("Не указан факультет или указан неверно!");
+        }
+        Faculty faculty = facultyRepository
+                .findById(student.getFaculty().getId())
+                .orElseThrow(() ->
+                        new FacultyNotFound(
+                                "Факультет с id " + student.getFaculty().getId() + " не найден"
+                        )
+                );
+
+        student.setFaculty(faculty);
+
         return studentRepository.save(student);
     }
 
@@ -34,7 +54,7 @@ public class StudentService {
                 ));
     }
 
-    public Student updateStudent (Student student) {
+    public Student updateStudent(Student student) {
         if (!studentRepository.existsById(student.getId())) {
             throw new StudentNotFound("ID не найден, изменения не возможно!");
         }
@@ -48,9 +68,27 @@ public class StudentService {
 
         studentRepository.delete(studentToDelete);
         return studentToDelete;
-     }
+    }
 
     public List<Student> findByAge(int age) {
         return studentRepository.findByAge(age);
     }
+
+    public List<Student> findByAgeBetween(int from, int to) {
+        return studentRepository.findByAgeBetween(from, to);
+    }
+
+    public Faculty getFacultyByStudentId(Student student) {
+        if (student == null) {
+            throw new StudentNotFound("Студент не существует!");
+        }
+        Long facultyId = (student.getFaculty() != null) ? student.getFaculty().getId() : null;
+
+        if (facultyId == null) {
+            throw new FacultyNotFound("У данного студента отсутствует информация о факультете!");
+        }
+        return facultyRepository.findById(facultyId)
+                .orElseThrow(() -> new FacultyNotFound("Уточните информацию данный факультет отсутствует или указан неверно!"));
+    }
+
 }

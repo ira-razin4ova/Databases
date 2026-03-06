@@ -1,9 +1,7 @@
 package ru.hogwarts.school.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,20 +10,30 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
+@Table(name = "student")
 public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "age", nullable = false)
     private int age;
 
-    public Student(Long id, String name, int age) {
-        this.id = id;
+    @ManyToOne
+    @JoinColumn(name = "faculty_id")
+    @JsonIgnoreProperties("student")
+    private Faculty faculty;
+
+    public Student(String name, int age, Faculty faculty) {
         this.name = name;
         this.age = age;
+        this.faculty = faculty;
     }
+
     public Student() {
-        // Пустой! Нужен для Hibernate/JPA
     }
 
     @Override

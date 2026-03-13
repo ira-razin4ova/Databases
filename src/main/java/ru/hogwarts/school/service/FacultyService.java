@@ -1,5 +1,6 @@
 package ru.hogwarts.school.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.exception.FacultyNotFound;
 import ru.hogwarts.school.exception.StudentNotFound;
@@ -9,7 +10,7 @@ import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.List;
-
+@Transactional
 @Service
 public class FacultyService {
     
@@ -51,7 +52,6 @@ if (id == null) {
 
     }
     public List<Faculty> search(String name, String color) {
-        // Если пришел null, меняем на пустую строку "", чтобы база не ругалась
         String searchName = (name == null) ? "" : name;
         String searchColor = (color == null) ? "" : color;
 

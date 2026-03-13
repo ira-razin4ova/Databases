@@ -10,8 +10,7 @@ import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
+@Transactional
 @Service
 // @RequiredArgsConstructor Lombok Автоматически создаст конструктор для всех final полей
 public class StudentService {
@@ -90,5 +89,27 @@ public class StudentService {
         return facultyRepository.findById(facultyId)
                 .orElseThrow(() -> new FacultyNotFound("Уточните информацию данный факультет отсутствует или указан неверно!"));
     }
+     public String exportStudentToCsv () {
+        List <Student> students = studentRepository.findAll();
+        StringBuilder csv = new StringBuilder("№,Id,Name,Age,FacultyId,FName,FColor\n");
+        for (Student student : students) {
+            int count = 1;
+            csv.append(count++).append(",")
+                    .append(student.getId()).append(",")
+                    .append(student.getName()).append(",")
+                    .append(student.getAge()).append(",");
+
+            if (student.getFaculty() != null) {
+                csv.append(student.getFaculty() .getId()).append(",")
+                        .append(student.getFaculty().getName()).append(",")
+                        .append(student.getFaculty() .getColor());
+            } else {
+                csv.append("-,-,-");
+            }
+            csv.append("\n");
+
+        }
+        return csv.toString();
+     }
 
 }

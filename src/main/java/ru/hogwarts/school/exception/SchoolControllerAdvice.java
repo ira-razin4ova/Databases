@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.io.IOException;
+
 @RestControllerAdvice
 public class SchoolControllerAdvice {
 
@@ -51,5 +53,24 @@ public class SchoolControllerAdvice {
     public ResponseEntity<String> handleConstraintViolation(ConstraintViolationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body("Ошибка валидации: " + ex.getMessage());
+    }
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<String> handleIOException(IOException e) {
+        // Мы можем вывести детали в консоль (лог), чтобы программист (ты) знала, что случилось
+        e.printStackTrace();
+
+        // А пользователю отдаем вежливое общее сообщение
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Произошла ошибка при обработке файла на сервере. Обратитесь к администратору.");
+    }
+
+    @ExceptionHandler (AvatarException.class)
+    public ResponseEntity<SchoolError> handleAvatarException(AvatarException e) {
+        SchoolError error= new SchoolError(HttpStatus.NOT_FOUND.name(),
+                e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(error);
     }
 }

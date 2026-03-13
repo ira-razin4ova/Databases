@@ -1,6 +1,9 @@
 package ru.hogwarts.school.controller;
 
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -56,4 +59,12 @@ public class StudentController {
         return studentService.getFacultyByStudentId(student);
     }
 
+    @GetMapping ("/exprt/csv")
+    public ResponseEntity <String> exportCsv (){
+        String data = studentService.exportStudentToCsv();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDispositionFormData("attachment", "students.csv");
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        return ResponseEntity.ok().headers(headers).body(data);
+    }
 }

@@ -1,5 +1,6 @@
 package ru.hogwarts.school.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,10 +28,19 @@ public class Student {
     @JsonIgnoreProperties("student")
     private Faculty faculty;
 
-    public Student(String name, int age, Faculty faculty) {
+    @OneToOne (mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Avatar avatar;
+
+    @Column (name = "student_status")
+    @Enumerated(EnumType.STRING)
+    private StudentStatus studentStatus;
+
+    public Student(String name, int age, Faculty faculty, StudentStatus studentStatus) {
         this.name = name;
         this.age = age;
         this.faculty = faculty;
+        this.studentStatus = studentStatus;
+
     }
 
     public Student() {

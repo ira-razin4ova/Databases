@@ -35,12 +35,12 @@ public class Student {
     @Enumerated(EnumType.STRING)
     private StudentStatus studentStatus;
 
-    public Student(String name, int age, Faculty faculty, StudentStatus studentStatus) {
+    public Student(Long id, String name, int age, Faculty faculty, StudentStatus studentStatus) {
+        this.id = id;
         this.name = name;
         this.age = age;
         this.faculty = faculty;
         this.studentStatus = studentStatus;
-
     }
 
     public Student() {

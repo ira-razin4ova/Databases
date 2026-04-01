@@ -1,8 +1,9 @@
-package ru.hogwarts.school;
+package ru.hogwarts.school.service.test;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
@@ -15,11 +16,11 @@ import ru.hogwarts.school.model.StudentStatus;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 import ru.hogwarts.school.service.FacultyService;
-import ru.hogwarts.school.service.StudentService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -96,17 +97,16 @@ public class FacultyServiceTest {
 
         when(facultyRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(FacultyNotFound.class, () -> {
-            facultyService.facultySearchId(id);
-        });
+        assertThrows(FacultyNotFound.class, () ->
+            facultyService.facultySearchId(id));
+
     }
 
     @ParameterizedTest
     @NullSource
     void facultyByIdNull(Long argument) {
-        assertThrows(IllegalArgumentException.class, () -> {
-            facultyService.facultySearchId(argument);
-        });
+        assertThrows(IllegalArgumentException.class, () ->
+            facultyService.facultySearchId(argument));
     }
 
     @ParameterizedTest
@@ -140,9 +140,8 @@ public class FacultyServiceTest {
 
         when(facultyRepository.existsById(id)).thenReturn(false);
 
-        assertThrows(FacultyNotFound.class, () -> {
-            facultyService.editFaculty(testFaculty);
-        });
+        assertThrows(FacultyNotFound.class, () ->
+            facultyService.editFaculty(testFaculty));
     }
 
     @ParameterizedTest
@@ -157,6 +156,7 @@ public class FacultyServiceTest {
 
         verify(facultyRepository, times(1)).delete(testFaculty);
     }
+
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 2, 3})
     void deleteFacultyNotFound (int ints) {
@@ -164,9 +164,31 @@ public class FacultyServiceTest {
         Long id = testFaculty.getId();
 
         when(facultyRepository.findById(id)).thenReturn(Optional.empty());
-        assertThrows(FacultyNotFound.class, () -> {
-            facultyService.deleteFaculty(id);
-        });
+        assertThrows(FacultyNotFound.class, () ->
+            facultyService.deleteFaculty(id));
+    }
+    @ParameterizedTest
+    @CsvSource({
+            "Биология, null ",
+            "null, Красный",
+            "Биология, Красный"
+    })
+    void findByNameOrColorTest(String name, String color) {
+        // 1. Подготовка: создаем список, который "якобы" нашла база
+        List<Faculty> expectedFaculties = facultyTest.stream()
+                       .filter(f -> f.getName().equals(name) || f.getColor().equals(color))
+                .toList();
+
+        when(facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color))
+                .thenReturn(expectedFaculties);
+
+        List<Faculty> result = facultyService.findByNameOrColor(name, color);
+
+        assertNotNull(result);
+        assertEquals(expectedFaculties.size(), result.size());
+
+
+        verify(facultyRepository).findByNameIgnoreCaseOrColorIgnoreCase(name, color);
     }
 
     @ParameterizedTest
@@ -177,11 +199,47 @@ public class FacultyServiceTest {
                 .toList();
         when(studentRepository.findByFaculty_Id(facultyId)).thenReturn(expectedStudent);
 
-        List<Student> result = studentRepository.findByFaculty_Id(facultyId);
+        List<Student> result = facultyService.studentsFacultyById(facultyId);
 
         assertNotNull(result);
         assertEquals(expectedStudent.size(), result.size());
         assertTrue(result.stream().allMatch(s -> s.getFaculty() != null && s.getFaculty().getId().equals(facultyId)));
         verify(studentRepository, times(1)).findByFaculty_Id(facultyId);
     }
-}
+
+    @ParameterizedTest
+    @NullSource
+    void searchStudentFacultyNotFound (Long facultyId) {
+        assertThrows(FacultyNotFound.class, () ->
+                facultyService.studentsFacultyById(facultyId));
+    }
+
+        @TestFactory
+        @DisplayName("Динамическая проверка всех факультетов на ошибку поиска")
+        Stream<DynamicTest> dynamicFacultiesNotFoundTest() {
+            // Идем по твоему списку из setUp
+            return facultyTest.stream().map(faculty -> {
+                // Вытаскиваем данные для удобства
+                Long id = faculty.getId();
+                String name = faculty.getName();
+
+                // Создаем отдельный минитест для каждого элемента
+                return DynamicTest.dynamicTest("Факультет: " + name + " [ID: " + id + "]", () -> {
+
+                    // 1. Обучаем мок (имитируем пустоту в базе)
+                    when(facultyRepository.findById(id)).thenReturn(Optional.empty());
+
+                    // 2. Ловим исключение
+                    FacultyNotFound exception = assertThrows(FacultyNotFound.class, () ->
+                            facultyService.facultySearchId(id)
+                    );
+
+                    // 3. Проверяем твой текст ошибки
+                    assertEquals("Факультет с таким id не найден", exception.getMessage());
+
+                    // Бонус: проверяем, что репозиторий вызывался именно с этим ID
+                    verify(facultyRepository).findById(id);
+                });
+            });
+        }
+    }

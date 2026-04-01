@@ -10,6 +10,9 @@ import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Transactional
 @Service
 // @RequiredArgsConstructor Lombok Автоматически создаст конструктор для всех final полей
@@ -53,7 +56,7 @@ public class StudentService {
                 ));
     }
 
-    public Student updateStudent(Student student) {
+    public Student editStudent(Student student) {
         if (!studentRepository.existsById(student.getId())) {
             throw new StudentNotFound("ID не найден, изменения не возможно!");
         }
@@ -89,8 +92,9 @@ public class StudentService {
         return facultyRepository.findById(facultyId)
                 .orElseThrow(() -> new FacultyNotFound("Уточните информацию данный факультет отсутствует или указан неверно!"));
     }
-     public String exportStudentToCsv () {
-        List <Student> students = studentRepository.findAll();
+
+    public String exportStudentToCsv() {
+        List<Student> students = studentRepository.findAll();
         StringBuilder csv = new StringBuilder("№,Id,Name,Age,FacultyId,FName,FColor\n");
         for (Student student : students) {
             int count = 1;
@@ -100,9 +104,9 @@ public class StudentService {
                     .append(student.getAge()).append(",");
 
             if (student.getFaculty() != null) {
-                csv.append(student.getFaculty() .getId()).append(",")
+                csv.append(student.getFaculty().getId()).append(",")
                         .append(student.getFaculty().getName()).append(",")
-                        .append(student.getFaculty() .getColor());
+                        .append(student.getFaculty().getColor());
             } else {
                 csv.append("-,-,-");
             }
@@ -110,6 +114,19 @@ public class StudentService {
 
         }
         return csv.toString();
-     }
+    }
+
+    public Map<Long, Student> studentMap(int age) {
+        return studentRepository.findAll().stream()
+                .filter(student -> student.getAge() >= age)
+                .collect(Collectors.toMap(Student::getId, Function.identity(), (oldValue, newValue) -> newValue)); // делать при конфликте ID
+    }
+
+    public List <String> stringListString (String name) {
+        return studentRepository.findAll().stream()
+                .filter(student -> student.getName().equalsIgnoreCase(name))
+                .map(Student :: getName)
+                .collect(Collectors.toUnmodifiableList());
+    }
 
 }

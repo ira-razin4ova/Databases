@@ -28,7 +28,7 @@ public class AvatarController {
 
     @GetMapping ("/{id}")
     public Avatar findByIdStudent (@PathVariable Long id) {
-        return avatarService.findAvatarId(id);
+        return avatarService.findAvatarIdStudent(id);
     }
 
     @GetMapping("/{id}/data")

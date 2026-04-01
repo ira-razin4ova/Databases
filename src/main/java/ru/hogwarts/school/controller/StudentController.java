@@ -4,13 +4,15 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.List;
-//@Validated Включает проверку всех аннотаций @Positive, @Min, @Max в этом классе
+
+@Validated //Включает проверку всех аннотаций @Positive, @Min, @Max в этом классе
 @RestController
 @RequestMapping("/student")
 public class StudentController {
@@ -35,7 +37,7 @@ public class StudentController {
     public Student updateStudent(@PathVariable @Positive Long id,
                                  @RequestBody Student student) {
         student.setId(id);
-        return studentService.updateStudent(student);
+        return studentService.editStudent(student);
     }
 
     @DeleteMapping("{id}")
@@ -59,8 +61,8 @@ public class StudentController {
         return studentService.getFacultyByStudentId(student);
     }
 
-    @GetMapping ("/exprt/csv")
-    public ResponseEntity <String> exportCsv (){
+    @GetMapping("/export/csv")
+    public ResponseEntity<String> exportCsv() {
         String data = studentService.exportStudentToCsv();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentDispositionFormData("attachment", "students.csv");

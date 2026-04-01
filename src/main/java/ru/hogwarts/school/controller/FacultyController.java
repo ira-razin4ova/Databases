@@ -1,13 +1,14 @@
 package ru.hogwarts.school.controller;
 
 import jakarta.validation.constraints.Positive;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.FacultyService;
 
 import java.util.List;
-
+@Validated
 @RestController
 @RequestMapping("/faculty")
 public class FacultyController {

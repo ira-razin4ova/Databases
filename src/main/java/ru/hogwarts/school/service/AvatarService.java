@@ -75,20 +75,36 @@ public class AvatarService {
         try (InputStream is = Files.newInputStream(filePath);
              BufferedInputStream bis = new BufferedInputStream(is, 1024);
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            BufferedImage image = ImageIO.read(bis);
 
-            int height = image.getHeight() / (image.getWidth() / 100);
-            BufferedImage preview = new BufferedImage(100, height, image.getType());
+            BufferedImage image = ImageIO.read(bis);
+            if (image == null) {
+                throw new AvatarException("Не удалось прочитать картинку!");
+            }
+
+            // 1. Исправляем деление на ноль (через double)
+            double ratio = (double) image.getWidth() / 100;
+            int height = (int) (image.getHeight() / ratio);
+            if (height <= 0) height = 1;
+
+            // 2. Исправляем тип 0 (TYPE_CUSTOM)
+            int type = (image.getType() == 0) ? BufferedImage.TYPE_INT_ARGB : image.getType();
+
+            BufferedImage preview = new BufferedImage(100, height, type);
             Graphics2D graphics = preview.createGraphics();
+
+            // Добавляем сглаживание, чтобы превью не было "пиксельным"
+            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
             graphics.drawImage(image, 0, 0, 100, height, null);
             graphics.dispose();
 
+            // 3. Сохраняем результат
             ImageIO.write(preview, getExtension(filePath.getFileName().toString()), baos);
             return baos.toByteArray();
         }
     }
 
-    public Avatar findAvatarId(Long id) {
+    public Avatar findAvatarIdStudent (Long id) {
         return avatarRepository.findByStudentId(id)
                 .orElseThrow(() -> new AvatarException("Аватар для студента с id " + id + " не найден"));
     }

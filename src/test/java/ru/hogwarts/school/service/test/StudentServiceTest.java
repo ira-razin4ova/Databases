@@ -1,4 +1,4 @@
-package ru.hogwarts.school;
+package ru.hogwarts.school.service.test;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -78,9 +78,8 @@ public class StudentServiceTest {
     void createStudentFacultyNull() {
         Student testStudent = studentsTest.get(4);
 
-        assertThrows(FacultyNotFound.class, () -> {
-            studentService.creteStudent(testStudent);
-        });
+        assertThrows(FacultyNotFound.class, () ->
+            studentService.creteStudent(testStudent));
         verify(studentRepository, never()).save(any());
     }
 
@@ -89,9 +88,7 @@ public class StudentServiceTest {
         Student testStudent = studentsTest.get(0);
         when(facultyRepository.findById(testStudent.getFaculty().getId())).thenReturn(Optional.empty());
         assertThrows(FacultyNotFound.class, () ->
-        {
-            studentService.creteStudent(testStudent);
-        });
+            studentService.creteStudent(testStudent));
     }
 
     // @DisplayName("Поиск студента успешны")
@@ -109,17 +106,15 @@ public class StudentServiceTest {
     @ValueSource(longs = {6L, 7L, 8L, 9L, 10L})
     void studentNotFound(Long longs) {
         when(studentRepository.findById(longs)).thenReturn(Optional.empty());
-        assertThrows(StudentNotFound.class, () -> {
-            studentService.studentSearch(longs);
-        });
+        assertThrows(StudentNotFound.class, () ->
+            studentService.studentSearch(longs));
         verify(studentRepository, times(1)).findById(longs);
     }
 
     @Test
     void studentIdNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            studentService.studentSearch(null);
-        });
+        assertThrows(IllegalArgumentException.class, () ->
+            studentService.studentSearch(null));
         verify(studentRepository, never()).findById(null);
     }
 
@@ -136,7 +131,7 @@ public class StudentServiceTest {
 
         testStudent.setName(newName);
         testStudent.setFaculty(testFaculty);
-        Student result = studentService.updateStudent(testStudent);
+        Student result = studentService.editStudent(testStudent);
         assertNotNull(result);
         assertEquals(newName, result.getName());
         assertEquals(testFaculty.getId(), result.getFaculty().getId());
@@ -149,9 +144,8 @@ public class StudentServiceTest {
         Student testStudent = studentsTest.get(index);
         when(studentRepository.existsById(testStudent.getId())).thenReturn(false);
 
-        assertThrows(StudentNotFound.class, () -> {
-            studentService.updateStudent(testStudent);
-        });
+        assertThrows(StudentNotFound.class, () ->
+            studentService.editStudent(testStudent));
         verify(studentRepository, never()).save(any());
     }
 
@@ -160,9 +154,8 @@ public class StudentServiceTest {
     void studentDeleteNotFound(Long longs) {
         when(studentRepository.findById(longs)).thenReturn(Optional.empty());
 
-        assertThrows(StudentNotFound.class, () -> {
-            studentService.deleteStudent(longs);
-        });
+        assertThrows(StudentNotFound.class, () ->
+            studentService.deleteStudent(longs));
         verify(studentRepository, never()).deleteById(longs);
     }
 
@@ -180,9 +173,8 @@ public class StudentServiceTest {
     @ParameterizedTest
     @NullSource
     void studentIdNull2(Long argument) {
-        assertThrows(IllegalArgumentException.class, () -> {
-            studentService.studentSearch(argument);
-        });
+        assertThrows(IllegalArgumentException.class, () ->
+            studentService.studentSearch(argument));
         verify(studentRepository, never()).findById(argument);
     }
 
@@ -256,37 +248,32 @@ public class StudentServiceTest {
     @ParameterizedTest
     @NullSource
     void findFacultyByStudentIdStudentNull (Student argument) {
-        assertThrows(StudentNotFound.class, () -> {
-            studentService.getFacultyByStudentId(argument);
-        });
+        assertThrows(StudentNotFound.class, () ->
+            studentService.getFacultyByStudentId(argument));
 
     }
     @Test
     void findFacultyByStudentIdStudentFacultyIdNull () {
         Student testStudent = studentsTest.get(4);
 
-        assertThrows(FacultyNotFound.class, () -> {
-            studentService.getFacultyByStudentId(testStudent);
-        });
+        assertThrows(FacultyNotFound.class, () ->
+            studentService.getFacultyByStudentId(testStudent));
     }
     @Test
     void facultyNotFoundInRepository() {
         Student testStudent = studentsTest.get(0);
         Long facultyId = testStudent.getFaculty().getId();
         when(facultyRepository.findById(facultyId)).thenReturn(Optional.empty());
-        assertThrows(FacultyNotFound.class, () -> {
-            studentService.getFacultyByStudentId(testStudent);
-        });
+        assertThrows(FacultyNotFound.class, () ->
+            studentService.getFacultyByStudentId(testStudent));
     }
     @Test
     @DisplayName("Тест на экспорт студентов в CSV")
     void testExportToCsv() {
         when(studentRepository.findAll()).thenReturn(studentsTest);
 
-        // 2. Вызываем метод
-        String csv = studentService.exportStudentToCsv();
+        String csv = studentService.exportStudentToCsv(); // так как наш файл это строка
 
-        // 3. Проверяем, что в строке есть хотя бы Артём (или любой из списка)
         assertNotNull(csv);
         assertTrue(csv.contains(studentsTest.get(0).getName()));
 

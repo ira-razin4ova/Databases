@@ -56,8 +56,7 @@ public class SchoolControllerAdvice {
     }
     @ExceptionHandler(IOException.class)
     public ResponseEntity<String> handleIOException(IOException e) {
-        // Мы можем вывести детали в консоль (лог), чтобы программист (ты) знала, что случилось
-        e.printStackTrace();
+        e.printStackTrace(); // для себя выводим лог в консоль
 
         // А пользователю отдаем вежливое общее сообщение
         return ResponseEntity

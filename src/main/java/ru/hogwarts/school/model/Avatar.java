@@ -13,6 +13,10 @@ public class Avatar {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     @Column(name = "file_path")
     private String filePath;
 

@@ -85,11 +85,11 @@ public class FacultyControllerTestTRT {
         Faculty newFaculty = facultyRepository.save(new Faculty(null, "TestName", "TestColor"));
         Long id = newFaculty.getId();
 
-        ResponseEntity<Faculty> response = testRestTemplate.exchange(
+        ResponseEntity<String> response = testRestTemplate.exchange(
                 "http://localhost:" + port + "/faculty/" + id,
                 HttpMethod.DELETE,
                 null,
-                Faculty.class
+                String.class
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(facultyRepository.existsById(id)).isFalse();

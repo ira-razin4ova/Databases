@@ -9,7 +9,7 @@ import org.springframework.http.*;
 import ru.hogwarts.school.controller.StudentController;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
-import ru.hogwarts.school.model.StudentStatus;
+import ru.hogwarts.school.constant.StudentStatus;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
@@ -41,12 +41,12 @@ public class StudentControllerTestTRT {
 
     @Test
     void getStudent() {
-        assertThat(this.testRestTemplate.getForEntity("http://localhost:" + port + "/student/1", String.class)).isNotNull();
+        assertThat(this.testRestTemplate.getForEntity("http://localhost:" + port + "/students/1", String.class)).isNotNull();
     }
 
     @Test
     void getStudentNotValidId() {
-        ResponseEntity<String> response = testRestTemplate.getForEntity("http://localhost:" + port + "/student/-100", String.class);
+        ResponseEntity<String> response = testRestTemplate.getForEntity("http://localhost:" + port + "/students/-100", String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).contains("Ошибка валидации:");
     }
@@ -55,11 +55,11 @@ public class StudentControllerTestTRT {
     void postStudent() {
         Faculty testNewFaculty = facultyRepository.save(new Faculty(null, "test", "test"));
         Student newStudent = new Student();
-        newStudent.setName("Test Tests");
+        newStudent.setFirstName("Test Tests");
         newStudent.setAge(25);
         newStudent.setFaculty(testNewFaculty);
 
-        ResponseEntity<Student> response = testRestTemplate.postForEntity("http://localhost:" + port + "/student", newStudent, Student.class);
+        ResponseEntity<Student> response = testRestTemplate.postForEntity("http://localhost:" + port + "/students", newStudent, Student.class);
         Long id = response.getBody().getId();
         System.out.println(id);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -70,28 +70,28 @@ public class StudentControllerTestTRT {
     @Test
     void putStudent() {
         Faculty testNewFaculty = facultyRepository.save(new Faculty(null, "test", "test"));
-        Student newStudent = studentRepository.save(new Student(null, "Sergei", 20, testNewFaculty, StudentStatus.ACTIVE));
-        newStudent.setName("setName");
+        Student newStudent = studentRepository.save(new Student(null, "Sergei","Leonov", 20, testNewFaculty, StudentStatus.ACTIVE));
+        newStudent.setFirstName("setName");
         newStudent.setAge(21);
 
         HttpEntity<Student> entity = new HttpEntity<>(newStudent);
-        ResponseEntity<Student> response = testRestTemplate.exchange("http://localhost:" + port + "/student/" +
+        ResponseEntity<Student> response = testRestTemplate.exchange("http://localhost:" + port + "/students/" +
                         entity.getBody().getId(),
                 HttpMethod.PUT,
                 entity,
                 Student.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().getName()).isEqualTo("setName");
+        assertThat(response.getBody().getFirstName()).isEqualTo("setName");
         assertThat(response.getBody().getAge()).isEqualTo(21);
     }
 
     @Test
     void deleteStudent() {
         Faculty testNewFaculty = facultyRepository.save(new Faculty(null, "test", "test"));
-        Student newStudent = studentRepository.save(new Student(null, "Sergei", 20, testNewFaculty, StudentStatus.ACTIVE));
+        Student newStudent = studentRepository.save(new Student(null, "Sergei", "Leonov",20, testNewFaculty, StudentStatus.ACTIVE));
         Long id = newStudent.getId();
 
-        ResponseEntity<Student> response = testRestTemplate.exchange("http://localhost:" + port + "/student/" + id,
+        ResponseEntity<Student> response = testRestTemplate.exchange("http://localhost:" + port + "/students/" + id,
                 HttpMethod.DELETE,
                 null,
                 Student.class);
@@ -102,7 +102,7 @@ public class StudentControllerTestTRT {
     @Test
     void getStudentsCsv() {
 
-        ResponseEntity<String> response = testRestTemplate.getForEntity("http://localhost:" + port + "/student/export/csv", String.class);
+        ResponseEntity<String> response = testRestTemplate.getForEntity("http://localhost:" + port + "/students/export/csv", String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getHeaders().getContentType().toString()).contains("text/plain");

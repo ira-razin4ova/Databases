@@ -1,35 +1,43 @@
 package ru.hogwarts.school.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.dto.product.ProductDTO;
+import ru.hogwarts.school.dto.student.StudentDTO;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.service.ProductService;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.List;
 
 @Validated //Включает проверку всех аннотаций @Positive, @Min, @Max в этом классе
 @RestController
-@RequestMapping("/student")
+@RequestMapping("/students")
 public class StudentController {
 
     private final StudentService studentService;
 
-    public StudentController(StudentService studentService) {
+    private final ProductService productService;
+
+    public StudentController(StudentService studentService,
+                             ProductService productService) {
         this.studentService = studentService;
+        this.productService = productService;
     }
 
     @GetMapping("{id}")
     public Student getStudent(@PathVariable @Positive Long id) {
-        return studentService.studentSearch(id);
+        return studentService.getStudentById(id);
     }
 
     @PostMapping
-    public Student createStudent(@RequestBody Student student) {
+    public Student createStudent(@RequestBody @Valid Student student) {
         return studentService.creteStudent(student);
     }
 
@@ -56,9 +64,10 @@ public class StudentController {
         return studentService.findByAgeBetween(from, to);
     }
 
-    @PostMapping("info-faculty")
-    public Faculty getFacultyInfo(@RequestBody Student student) {
-        return studentService.getFacultyByStudentId(student);
+    @GetMapping("/student/{id}/faculty")
+    public ResponseEntity<Faculty> getFacultyByStudentId(@PathVariable @Positive Long id) {
+        Faculty faculty = studentService.getFacultyByStudentId(id);
+        return ResponseEntity.ok(faculty);
     }
 
     @GetMapping("/export/csv")
@@ -68,5 +77,11 @@ public class StudentController {
         headers.setContentDispositionFormData("attachment", "students.csv");
         headers.setContentType(MediaType.TEXT_PLAIN);
         return ResponseEntity.ok().headers(headers).body(data);
+    }
+    @GetMapping("/dto/{id}")
+    public ResponseEntity<StudentDTO> getStudentByIdDTO(@PathVariable Long id) {
+        StudentDTO studentDTO = studentService.getByIdDTO(id);
+
+        return ResponseEntity.ok(studentDTO);
     }
 }

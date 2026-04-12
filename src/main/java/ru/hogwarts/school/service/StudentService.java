@@ -2,8 +2,9 @@ package ru.hogwarts.school.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import ru.hogwarts.school.exception.FacultyNotFound;
-import ru.hogwarts.school.exception.StudentNotFound;
+import ru.hogwarts.school.dto.student.StudentDTO;
+import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.mapper.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
@@ -20,21 +21,23 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final FacultyRepository facultyRepository;
+    private final StudentMapper studentMapper;
 
-    public StudentService(StudentRepository studentRepository, FacultyRepository facultyRepository) {
+    public StudentService(StudentRepository studentRepository, FacultyRepository facultyRepository, StudentMapper studentMapper) {
         this.studentRepository = studentRepository;
         this.facultyRepository = facultyRepository;
+        this.studentMapper = studentMapper;
     }
 
     public Student creteStudent(Student student) {
 
         if (student.getFaculty() == null || student.getFaculty().getId() == null) {
-            throw new FacultyNotFound("Не указан факультет или указан неверно!");
+            throw new NotFoundException("Не указан факультет или указан неверно!");
         }
         Faculty faculty = facultyRepository
                 .findById(student.getFaculty().getId())
                 .orElseThrow(() ->
-                        new FacultyNotFound(
+                        new NotFoundException(
                                 "Факультет с id " + student.getFaculty().getId() + " не найден"
                         )
                 );
@@ -45,28 +48,23 @@ public class StudentService {
     }
 
 
-    public Student studentSearch(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("У студента не установлен ID");
-        }
-
+    public Student getStudentById(Long id) {
         return studentRepository.findById(id)
-                .orElseThrow(() -> new StudentNotFound(
-                        "Пользователь с таким id  не найден"
+                .orElseThrow(() -> new NotFoundException(
+                        "Пользователь с таким" + id +  "не найден"
                 ));
     }
 
     public Student editStudent(Student student) {
         if (!studentRepository.existsById(student.getId())) {
-            throw new StudentNotFound("ID не найден, изменения не возможно!");
+            throw new NotFoundException("ID не найден, изменения не возможно!");
         }
         student.setId(student.getId());
         return studentRepository.save(student);
     }
 
     public Student deleteStudent(Long id) {
-        Student studentToDelete = studentRepository.findById(id)
-                .orElseThrow(() -> new StudentNotFound("Невозможно удалить: студент с ID не найден! Или был удален ранее!"));
+        Student studentToDelete  = getStudentById(id);
 
         studentRepository.delete(studentToDelete);
         return studentToDelete;
@@ -80,27 +78,24 @@ public class StudentService {
         return studentRepository.findByAgeBetween(from, to);
     }
 
-    public Faculty getFacultyByStudentId(Student student) {
-        if (student == null) {
-            throw new StudentNotFound("Студент не существует!");
-        }
-        Long facultyId = (student.getFaculty() != null) ? student.getFaculty().getId() : null;
+    public Faculty getFacultyByStudentId(Long studentId) {
+        Student student = getStudentById(studentId);
 
-        if (facultyId == null) {
-            throw new FacultyNotFound("У данного студента отсутствует информация о факультете!");
+        if (student.getFaculty() == null) {
+            throw new NotFoundException("Уточните информацию данный факультет отсутствует или указан неверно!");
         }
-        return facultyRepository.findById(facultyId)
-                .orElseThrow(() -> new FacultyNotFound("Уточните информацию данный факультет отсутствует или указан неверно!"));
+        return student.getFaculty();
     }
 
     public String exportStudentToCsv() {
         List<Student> students = studentRepository.findAll();
-        StringBuilder csv = new StringBuilder("№,Id,Name,Age,FacultyId,FName,FColor\n");
+        StringBuilder csv = new StringBuilder("№,Id,firstName,lastName,Age,FacultyId,FName,FColor\n");
         for (Student student : students) {
             int count = 1;
             csv.append(count++).append(",")
                     .append(student.getId()).append(",")
-                    .append(student.getName()).append(",")
+                    .append(student.getFirstName()).append(",")
+                    .append(student.getLastName()).append(",")
                     .append(student.getAge()).append(",");
 
             if (student.getFaculty() != null) {
@@ -121,12 +116,10 @@ public class StudentService {
                 .filter(student -> student.getAge() >= age)
                 .collect(Collectors.toMap(Student::getId, Function.identity(), (oldValue, newValue) -> newValue)); // делать при конфликте ID
     }
+    public StudentDTO getByIdDTO(Long id) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
 
-    public List <String> stringListString (String name) {
-        return studentRepository.findAll().stream()
-                .filter(student -> student.getName().equalsIgnoreCase(name))
-                .map(Student :: getName)
-                .collect(Collectors.toUnmodifiableList());
+        return studentMapper.mapToDto(student);
     }
-
 }

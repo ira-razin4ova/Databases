@@ -21,11 +21,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
-import ru.hogwarts.school.exception.AvatarException;
+import ru.hogwarts.school.constant.StudentStatus;
+import ru.hogwarts.school.dto.avatar.AvatarDto;
+import ru.hogwarts.school.exception.BadRequestException;
+import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.mapper.AvatarMapper;
 import ru.hogwarts.school.model.Avatar;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
-import ru.hogwarts.school.model.StudentStatus;
 import ru.hogwarts.school.repository.AvatarRepository;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
@@ -52,6 +55,9 @@ public class AvatarServiceTest {
     @Mock
     private StudentService studentService;
 
+    @Mock
+    private AvatarMapper avatarMapper;
+
     @InjectMocks
     private AvatarService avatarService;
 
@@ -61,6 +67,8 @@ public class AvatarServiceTest {
     private Path tempDir;
     private List<Student> studentsTest;
     private List<Faculty> facultyTest;
+    private AvatarDto dto;
+    private Avatar avatar;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -73,22 +81,30 @@ public class AvatarServiceTest {
         byte[] imageBytes = baos.toByteArray();
 
         validImage = new MockMultipartFile(
-                "file", "avatar.png", "image/png", imageBytes);
+                "avatar", "avatar.png", "image/png", imageBytes);
 
         illegalFile = new MockMultipartFile(
-                "file", "test.txt", "text/plain", "Not an image".getBytes());
+                "avatar", "test.txt", "text/plain", "Not an image".getBytes());
 
-        nullTypeFile = new MockMultipartFile("file", "avatar.png", null, "some image data".getBytes());
+        nullTypeFile = new MockMultipartFile("avatar", "avatar.png", null, "some image data".getBytes());
 
         Faculty faculty1 = new Faculty(1L, "Химия", "Красный");
         facultyTest = new ArrayList<>(List.of(faculty1));
 
-        Student student1 = new Student(1L, "Артём", 23, faculty1, StudentStatus.ACTIVE);
-        Student student2 = new Student(2L, "Мария", 20, faculty1, StudentStatus.ACTIVE);
-        Student student3 = new Student(3L, "Марат", 18, faculty1, StudentStatus.ACTIVE);
-        Student student4 = new Student(4L, "Софья", 18, faculty1, StudentStatus.ACTIVE);
+        Student student1 = new Student(1L, "Артём", "Смирнов", 23, faculty1, StudentStatus.ACTIVE);
+        Student student2 = new Student(2L, "Мария","Леонова", 20, faculty1, StudentStatus.ACTIVE);
+        Student student3 = new Student(3L, "Марат", "Измалков",18, faculty1, StudentStatus.ACTIVE);
+        Student student4 = new Student(4L, "Софья", "Афонина", 18, faculty1, StudentStatus.ACTIVE);
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4));
-
+        dto = new AvatarDto(
+                1L,
+                "1.png",
+                "1_preview.png"
+        );
+        avatar = new Avatar();
+        avatar.setId(1L);
+        avatar.setFilePath("1.png");
+        avatar.setFilePathPreview("1_preview.png");
     }
 
     @Test
@@ -151,7 +167,7 @@ public class AvatarServiceTest {
         Path fakeImagePath = Path.of("src/test/resources/avatars/fake_image.png");// файл, который притворяется картинкой, внутри текст
         Files.createDirectories(fakeImagePath.getParent());
         Files.write(fakeImagePath, "Это просто текстовая строка, а не байты картинки".getBytes());
-        AvatarException exception = assertThrows(AvatarException.class, () ->
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 avatarService.generateImagePreview(fakeImagePath));
 
         assertEquals("Не удалось прочитать картинку!", exception.getMessage());  // Проверяем сообщение внутри ошибки
@@ -160,32 +176,38 @@ public class AvatarServiceTest {
 
     @Test
     void uploadAvatarFullSuccessTest() throws IOException {
+
         Student testStudent = studentsTest.get(0);
-        when(studentService.studentSearch(testStudent.getId())).thenReturn(testStudent);
-        when(avatarRepository.findByStudentId(testStudent.getId())).thenReturn(Optional.empty());
 
-        when(avatarRepository.save(any(Avatar.class))).thenAnswer(i -> i.getArgument(0));
 
-        Avatar result = avatarService.uploadAvatar(1L, validImage);
+        when(studentService.getStudentById(1L))
+                .thenReturn(testStudent);
+
+        when(avatarRepository.findByStudentId(1L))
+                .thenReturn(Optional.empty());
+
+        when(avatarRepository.save(any(Avatar.class)))
+                .thenReturn(avatar);
+
+        when(avatarMapper.toDto(any(Avatar.class)))
+                .thenReturn(dto);
+
+        AvatarDto result = avatarService.uploadAvatar(testStudent.getId(), validImage);
 
         assertNotNull(result);
-        assertEquals(testStudent, result.getStudent());
-        assertEquals("image/png", result.getMediaType());
-        assertEquals(validImage.getSize(), result.getFileSize());
 
-        assertNotNull(result.getPreview(), "Превью не должно быть пустым");
+        assertEquals(1L, result.getId()); // или что ты туда кладёшь
+
         assertTrue(result.getFilePath().contains("1.png"));
+        assertTrue(result.getFilePathPreview().contains("1_preview"));
 
         verify(avatarRepository, times(1)).save(any(Avatar.class));
     }
 
     @Test
     void uploadAvatarIllegalFileTest() {
-        Student testStudent = studentsTest.get(0);
 
-        when(studentService.studentSearch(testStudent.getId())).thenReturn(testStudent);
-
-        AvatarException exception = assertThrows(AvatarException.class, () ->
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 avatarService.uploadAvatar(1L, illegalFile));
         assertEquals("Это не картинка! Грузи только jpeg, png или gif.", exception.getMessage());
     }
@@ -194,9 +216,9 @@ public class AvatarServiceTest {
     void uploadAvatarNullFileTest() {
         Student testStudent = studentsTest.get(0);
 
-        when(studentService.studentSearch(testStudent.getId())).thenReturn(testStudent);
+        when(studentService.getStudentById(testStudent.getId())).thenReturn(testStudent);
 
-        AvatarException exception = assertThrows(AvatarException.class, () ->
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 avatarService.uploadAvatar(1L, nullTypeFile));
 
         assertEquals("Это не картинка! Грузи только jpeg, png или gif.", exception.getMessage());
@@ -241,7 +263,7 @@ public class AvatarServiceTest {
 
         when(avatarRepository.findByStudentId(testStudent.getId())).thenReturn(Optional.empty());
 
-        assertThrows(AvatarException.class, () ->
+        assertThrows(NotFoundException.class, () ->
                 avatarService.findAvatarIdStudent(testStudent.getId()));
 
         verify(avatarRepository, times(1)).findByStudentId(testStudent.getId());

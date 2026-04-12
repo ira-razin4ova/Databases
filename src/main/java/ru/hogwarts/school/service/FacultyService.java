@@ -2,14 +2,13 @@ package ru.hogwarts.school.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import ru.hogwarts.school.exception.FacultyNotFound;
+import ru.hogwarts.school.exception.NotFoundException;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -27,29 +26,25 @@ public class FacultyService {
         return facultyRepository.save(faculty);
     }
 
-    public Faculty facultySearchId(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Введите данные для поиска");
-        }
-
+    public Faculty getFacultyById(Long id) {
         return facultyRepository.findById(id)
-                .orElseThrow(() -> new FacultyNotFound("Факультет с таким id не найден"));
+                .orElseThrow(() -> new NotFoundException("Факультет с таким " + id +  " не найден"));
     }
 
     public Faculty editFaculty(Faculty faculty) {
         if (!facultyRepository.existsById(faculty.getId())) {
-            throw new FacultyNotFound("ID не найден, изменения не возможно!");
+            throw new NotFoundException("ID не найден, изменения не возможно!");
         }
         faculty.setId(faculty.getId());
         return facultyRepository.save(faculty);
     }
 
-    public Faculty deleteFaculty(Long id) {
-        Faculty facultyToDelete = facultyRepository.findById(id)
-                .orElseThrow(() -> new FacultyNotFound("Невозможно удалить: факультет с ID не найден! Или был удален ранее"));
-
-        facultyRepository.delete(facultyToDelete);
-        return facultyToDelete;
+    @Transactional
+    public void deleteFaculty(Long id) {
+        if (!facultyRepository.existsById(id)) {
+            throw new NotFoundException("Невозможно удалить: факультет с ID " + id + " не найден!");
+        }
+        facultyRepository.deleteById(id);
     }
 
     public List<Faculty> search(String name, String color) {
@@ -64,9 +59,6 @@ public class FacultyService {
     }
 
     public List<Student> studentsFacultyById(Long facultyId) {
-        if (facultyId == null) {
-            throw new FacultyNotFound("Введите данные факультета для поиска");
-        }
         return studentRepository.findByFaculty_Id(facultyId);
     }
 

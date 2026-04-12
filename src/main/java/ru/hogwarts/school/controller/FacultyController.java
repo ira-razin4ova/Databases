@@ -1,6 +1,8 @@
 package ru.hogwarts.school.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
@@ -21,11 +23,11 @@ public class FacultyController {
 
     @GetMapping("{id}")
     public Faculty getFaculty(@PathVariable @Positive Long id) {
-        return facultyService.facultySearchId(id);
+        return facultyService.getFacultyById(id);
     }
 
     @PostMapping
-    public Faculty createFaculty(@RequestBody Faculty faculty) {
+    public Faculty createFaculty(@RequestBody @Valid Faculty faculty) {
         return facultyService.createFaculty(faculty);
     }
 
@@ -36,9 +38,10 @@ public class FacultyController {
         return facultyService.editFaculty(faculty);
     }
 
-    @DeleteMapping("{id}")
-    public Faculty deleteFaculty(@PathVariable @Positive Long id) {
-        return facultyService.deleteFaculty(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteFaculty(@PathVariable @Positive Long id) {
+        facultyService.deleteFaculty(id);
+        return ResponseEntity.ok("Факультет с ID " + id + " успешно удален");
     }
 
     @GetMapping("/search")

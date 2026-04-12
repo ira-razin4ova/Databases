@@ -9,10 +9,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.hogwarts.school.exception.FacultyNotFound;
+import ru.hogwarts.school.constant.StudentStatus;
+import ru.hogwarts.school.exception.BadRequestException;
+import ru.hogwarts.school.exception.NotFoundException;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
-import ru.hogwarts.school.model.StudentStatus;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 import ru.hogwarts.school.service.FacultyService;
@@ -41,11 +42,11 @@ public class FacultyServiceTest {
 
         facultyTest = new ArrayList<>(List.of(faculty1, faculty2, faculty3, faculty4));
 
-        Student student1 = new Student(1L, "Артём", 23, faculty1, StudentStatus.ACTIVE);
-        Student student2 = new Student(2L, "Мария", 20, faculty1, StudentStatus.ACTIVE);
-        Student student3 = new Student(3L, "Марат", 18, faculty2, StudentStatus.ACTIVE);
-        Student student4 = new Student(4L, "Софья", 18, faculty3, StudentStatus.ACTIVE);
-        Student student5 = new Student(5L, "Михаил", 19, null, StudentStatus.ACTIVE);
+        Student student1 = new Student(1L, "Артём", "Смирнов", 23, faculty1, StudentStatus.ACTIVE);
+        Student student2 = new Student(2L, "Мария","Леонова", 20, faculty1, StudentStatus.ACTIVE);
+        Student student3 = new Student(3L, "Марат", "Измалков",18, faculty1, StudentStatus.ACTIVE);
+        Student student4 = new Student(4L, "Софья", "Афонина", 18, faculty1, StudentStatus.ACTIVE);
+        Student student5 = new Student(5L, "Михаил", "Бачурин", 19, null, StudentStatus.ACTIVE);
 
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4, student5));
     }
@@ -81,7 +82,7 @@ public class FacultyServiceTest {
 
         when(facultyRepository.findById(id)).thenReturn(Optional.of(testfaculty));
 
-        Faculty result = facultyService.facultySearchId(id);
+        Faculty result = facultyService.getFacultyById(id);
 
         assertNotNull(result);
         assertEquals(testfaculty.getId(), result.getId());
@@ -97,16 +98,16 @@ public class FacultyServiceTest {
 
         when(facultyRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(FacultyNotFound.class, () ->
-            facultyService.facultySearchId(id));
+        assertThrows(NotFoundException.class, () ->
+                facultyService.getFacultyById(id));
 
     }
 
     @ParameterizedTest
     @NullSource
     void facultyByIdNull(Long argument) {
-        assertThrows(IllegalArgumentException.class, () ->
-            facultyService.facultySearchId(argument));
+        assertThrows(NotFoundException.class, () ->
+                facultyService.getFacultyById(argument));
     }
 
     @ParameterizedTest
@@ -140,8 +141,8 @@ public class FacultyServiceTest {
 
         when(facultyRepository.existsById(id)).thenReturn(false);
 
-        assertThrows(FacultyNotFound.class, () ->
-            facultyService.editFaculty(testFaculty));
+        assertThrows(NotFoundException.class, () ->
+                facultyService.editFaculty(testFaculty));
     }
 
     @ParameterizedTest
@@ -150,11 +151,11 @@ public class FacultyServiceTest {
         Faculty testFaculty = facultyTest.get(ints);
         Long id = testFaculty.getId();
 
-        when(facultyRepository.findById(id)).thenReturn(Optional.of(testFaculty));
+        when(facultyRepository.existsById(id)).thenReturn(true);
 
         facultyService.deleteFaculty(id);
 
-        verify(facultyRepository, times(1)).delete(testFaculty);
+        verify(facultyRepository, times(1)).deleteById(id);
     }
 
     @ParameterizedTest
@@ -163,9 +164,9 @@ public class FacultyServiceTest {
         Faculty testFaculty = facultyTest.get(ints);
         Long id = testFaculty.getId();
 
-        when(facultyRepository.findById(id)).thenReturn(Optional.empty());
-        assertThrows(FacultyNotFound.class, () ->
-            facultyService.deleteFaculty(id));
+        when(facultyRepository.existsById(id)).thenReturn(false);
+        assertThrows(NotFoundException.class, () ->
+                facultyService.deleteFaculty(id));
     }
     @ParameterizedTest
     @CsvSource({
@@ -176,7 +177,7 @@ public class FacultyServiceTest {
     void findByNameOrColorTest(String name, String color) {
         // 1. Подготовка: создаем список, который "якобы" нашла база
         List<Faculty> expectedFaculties = facultyTest.stream()
-                       .filter(f -> f.getName().equals(name) || f.getColor().equals(color))
+                .filter(f -> f.getName().equals(name) || f.getColor().equals(color))
                 .toList();
 
         when(facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color))
@@ -207,39 +208,32 @@ public class FacultyServiceTest {
         verify(studentRepository, times(1)).findByFaculty_Id(facultyId);
     }
 
-    @ParameterizedTest
-    @NullSource
-    void searchStudentFacultyNotFound (Long facultyId) {
-        assertThrows(FacultyNotFound.class, () ->
-                facultyService.studentsFacultyById(facultyId));
-    }
+    @TestFactory
+    @DisplayName("Динамическая проверка всех факультетов на ошибку поиска")
+    Stream<DynamicTest> dynamicFacultiesNotFoundTest() {
+        // Идем по твоему списку из setUp
+        return facultyTest.stream().map(faculty -> {
+            // Вытаскиваем данные для удобства
+            Long id = faculty.getId();
+            String name = faculty.getName();
 
-        @TestFactory
-        @DisplayName("Динамическая проверка всех факультетов на ошибку поиска")
-        Stream<DynamicTest> dynamicFacultiesNotFoundTest() {
-            // Идем по твоему списку из setUp
-            return facultyTest.stream().map(faculty -> {
-                // Вытаскиваем данные для удобства
-                Long id = faculty.getId();
-                String name = faculty.getName();
+            // Создаем отдельный минитест для каждого элемента
+            return DynamicTest.dynamicTest("Факультет: " + name + " [ID: " + id + "]", () -> {
 
-                // Создаем отдельный минитест для каждого элемента
-                return DynamicTest.dynamicTest("Факультет: " + name + " [ID: " + id + "]", () -> {
+                // 1. Обучаем мок (имитируем пустоту в базе)
+                when(facultyRepository.findById(id)).thenReturn(Optional.empty());
 
-                    // 1. Обучаем мок (имитируем пустоту в базе)
-                    when(facultyRepository.findById(id)).thenReturn(Optional.empty());
+                // 2. Ловим исключение
+                NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                        facultyService.getFacultyById(id)
+                );
 
-                    // 2. Ловим исключение
-                    FacultyNotFound exception = assertThrows(FacultyNotFound.class, () ->
-                            facultyService.facultySearchId(id)
-                    );
+                // 3. Проверяем твой текст ошибки
+                assertEquals("Факультет с таким " + id + " не найден", exception.getMessage());
 
-                    // 3. Проверяем твой текст ошибки
-                    assertEquals("Факультет с таким id не найден", exception.getMessage());
-
-                    // Бонус: проверяем, что репозиторий вызывался именно с этим ID
-                    verify(facultyRepository).findById(id);
-                });
+                // Бонус: проверяем, что репозиторий вызывался именно с этим ID
+                verify(facultyRepository).findById(id);
             });
-        }
+        });
     }
+}

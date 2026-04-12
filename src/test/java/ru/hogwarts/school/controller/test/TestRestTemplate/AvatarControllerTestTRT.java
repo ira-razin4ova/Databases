@@ -12,7 +12,7 @@ import ru.hogwarts.school.controller.AvatarController;
 import ru.hogwarts.school.model.Avatar;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
-import ru.hogwarts.school.model.StudentStatus;
+import ru.hogwarts.school.constant.StudentStatus;
 import ru.hogwarts.school.repository.AvatarRepository;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
@@ -51,7 +51,7 @@ public class AvatarControllerTestTRT {
     }
 
     private Student createTestStudent(Faculty faculty) {
-        return studentRepository.save(new Student(null, "Temp Student", 20, faculty, StudentStatus.ACTIVE));
+        return studentRepository.save(new Student(null, "Temp Student", "Test Student", 20, faculty, StudentStatus.ACTIVE));
     }
 
     private Avatar createTestAvatar(Student student) {
@@ -86,7 +86,7 @@ public class AvatarControllerTestTRT {
         System.out.println(id);
 
         ResponseEntity<byte[]> response = testRestTemplate.getForEntity(
-                "http://localhost:" + port + "/avatar/" + id + "/data",
+                "http://localhost:" + port + "/avatars/" + id + "/data",
                 byte[].class
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -105,7 +105,7 @@ public class AvatarControllerTestTRT {
         System.out.println(id);
 
         ResponseEntity<byte[]> response = testRestTemplate.getForEntity(
-                "http://localhost:" + port + "/avatar/" + id + "/preview",
+                "http://localhost:" + port + "/avatars/" + id + "/preview",
                 byte[].class
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -123,7 +123,7 @@ public class AvatarControllerTestTRT {
         Long id = testStudent.getId();
 
         ResponseEntity<Avatar> response = testRestTemplate.getForEntity(
-                "http://localhost:" + port + "/avatar/" + id,
+                "http://localhost:" + port + "/avatars/" + id,
                 Avatar.class
         );
 
@@ -144,25 +144,20 @@ public class AvatarControllerTestTRT {
 
         LinkedMultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
-//        HttpHeaders partHeaders = new HttpHeaders();
-//        partHeaders.setContentType(MediaType.IMAGE_PNG); // делаем фейковые заголовки, будь-то это наш файл
-//
-//        HttpEntity<byte[]> fileEntity = new HttpEntity<>(fakeFile, partHeaders);
-
      ByteArrayResource contentsAsResource = new ByteArrayResource(fakeFile) {
       @Override
     public String getFilename() {
-         return "test-avatar.png"; // Контроллер увидит это как имя файла
-        }
-    }; //так же можно сделать с помощью специального класса, он позволит имя файла задать
+         return "test-avatar.png";
+      }
+    };
 
         body.add("avatar", contentsAsResource);
 
-        ResponseEntity<String> response = testRestTemplate.postForEntity("http://localhost:" + port + "/avatar/" + testStudent.getId() + "/upload",
+        ResponseEntity<String> response = testRestTemplate.postForEntity("http://localhost:" + port + "/avatars/" + testStudent.getId() + "/upload",
                 new HttpEntity<>(body, new HttpHeaders()), String.class
         );
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     }
 
 }

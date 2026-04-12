@@ -1,10 +1,10 @@
 package ru.hogwarts.school.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import ru.hogwarts.school.constant.StudentStatus;
 
 import java.util.Objects;
 
@@ -17,8 +17,11 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
 
     @Column(name = "age", nullable = false)
     private int age;
@@ -35,9 +38,10 @@ public class Student {
     @Enumerated(EnumType.STRING)
     private StudentStatus studentStatus;
 
-    public Student(Long id, String name, int age, Faculty faculty, StudentStatus studentStatus) {
+    public Student(Long id, String firstName, String lastName, int age, Faculty faculty, StudentStatus studentStatus) {
         this.id = id;
-        this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.age = age;
         this.faculty = faculty;
         this.studentStatus = studentStatus;
@@ -51,12 +55,12 @@ public class Student {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Student student = (Student) o;
-        return id == student.id && Objects.equals(name, student.name) && age == student.age;
+        return Objects.equals(id, student.id) && Objects.equals(firstName, student.firstName) && Objects.equals(lastName, student.lastName) && age == student.age;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, age);
+        return Objects.hash(id, firstName, age);
     }
 
     @Override
@@ -64,7 +68,7 @@ public class Student {
         return "Student{" +
                 "age=" + age +
                 ", id=" + id +
-                ", name='" + name + '\'' +
+                ", name='" + firstName + '\'' +
                 '}';
     }
 }

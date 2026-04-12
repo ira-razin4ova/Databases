@@ -13,12 +13,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.hogwarts.school.controller.FacultyController;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
-import ru.hogwarts.school.model.StudentStatus;
+import ru.hogwarts.school.constant.StudentStatus;
 import ru.hogwarts.school.service.FacultyService;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;// импортирует сразу все
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;// импортирует сразу все
 import static org.mockito.ArgumentMatchers.any;
@@ -47,10 +48,10 @@ public class FacultyControllerTestWMT {
 
         facultyTest = new ArrayList<>(List.of(faculty1, faculty2));
 
-        Student student1 = new Student(1L, "Артём", 23, faculty1, StudentStatus.ACTIVE);
-        Student student2 = new Student(2L, "Мария", 20, faculty1, StudentStatus.ACTIVE);
-        Student student3 = new Student(3L, "Марат", 18, faculty1, StudentStatus.ACTIVE);
-        Student student4 = new Student(4L, "Михаил", 19, null, StudentStatus.ACTIVE);
+        Student student1 = new Student(1L, "Артём", "Смирнов", 23, faculty1, StudentStatus.ACTIVE);
+        Student student2 = new Student(2L, "Мария", "Зайцева", 20, faculty1, StudentStatus.ACTIVE);
+        Student student3 = new Student(3L, "Марат", "Афонин", 18, faculty1, StudentStatus.ACTIVE);
+        Student student4 = new Student(4L, "Михаил", "Башаров", 19, null, StudentStatus.ACTIVE);
 
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4));
     }
@@ -71,7 +72,7 @@ public class FacultyControllerTestWMT {
     void facultyFindById() throws Exception {
         Faculty testFaculty = facultyTest.get(0);
 
-        when(facultyService.facultySearchId(testFaculty.getId())).thenReturn(testFaculty);
+        when(facultyService.getFacultyById(testFaculty.getId())).thenReturn(testFaculty);
 
         mockMvc.perform(get("/faculty/" + testFaculty.getId()))
                 .andExpect(status().isOk())
@@ -97,12 +98,13 @@ public class FacultyControllerTestWMT {
     @Test
     void deleteFaculty() throws Exception {
         Faculty testFaculty = facultyTest.get(0);
+        Long id = testFaculty.getId();
 
-        when(facultyService.deleteFaculty(testFaculty.getId())).thenReturn(testFaculty);
+        doNothing().when(facultyService).deleteFaculty(id);
 
         mockMvc.perform(delete("/faculty/" + testFaculty.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(testFaculty.getName()));
+                .andExpect(content().string("Факультет с ID " + id + " успешно удален"));
     }
 
     @Test
@@ -158,8 +160,6 @@ public class FacultyControllerTestWMT {
                         .param("name", name)
                         .param("color", color))
                 .andExpect(status().isOk());
-        // .andExpect(jsonPath("$[0].name").value(name))
-        // .andExpect(jsonPath("$[0].color").value(color));
     }
 
     @Test
@@ -175,7 +175,7 @@ public class FacultyControllerTestWMT {
         mockMvc.perform(get("/faculty/"+ testFaculty.getId() + "/faculty"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(expectedStudent.size()))
-                .andExpect(jsonPath("$[0].name").exists());
+                .andExpect(jsonPath("$[0].firstName").exists());
     }
 
 }

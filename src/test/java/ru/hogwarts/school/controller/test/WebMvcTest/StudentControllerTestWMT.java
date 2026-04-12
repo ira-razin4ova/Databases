@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.hogwarts.school.controller.StudentController;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
-import ru.hogwarts.school.model.StudentStatus;
+import ru.hogwarts.school.constant.StudentStatus;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.service.StudentService;
 
@@ -51,10 +51,10 @@ public class StudentControllerTestWMT {
 
         facultyTest = new ArrayList<>(List.of(faculty1, faculty2));
 
-        Student student1 = new Student(1L, "Артём", 23, faculty1, StudentStatus.ACTIVE);
-        Student student2 = new Student(2L, "Мария", 20, faculty1, StudentStatus.ACTIVE);
-        Student student3 = new Student(3L, "Марат", 18, faculty1, StudentStatus.ACTIVE);
-        Student student4 = new Student(4L, "Михаил", 19, null, StudentStatus.ACTIVE);
+        Student student1 = new Student(1L, "Артём", "Смирнов", 23, faculty1, StudentStatus.ACTIVE);
+        Student student2 = new Student(2L, "Мария", "Зайцева", 20, faculty1, StudentStatus.ACTIVE);
+        Student student3 = new Student(3L, "Марат", "Афонин", 18, faculty1, StudentStatus.ACTIVE);
+        Student student4 = new Student(4L, "Михаил", "Башаров", 19, null, StudentStatus.ACTIVE);
 
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4));
     }
@@ -64,11 +64,11 @@ public class StudentControllerTestWMT {
 
         Student testStudent = studentsTest.get(0);
 
-        when(studentService.studentSearch(testStudent.getId())).thenReturn(testStudent);
+        when(studentService.getStudentById(testStudent.getId())).thenReturn(testStudent);
 
-        mockMvc.perform(get("/student/" + testStudent.getId()))
+        mockMvc.perform(get("/students/" + testStudent.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(testStudent.getName()))
+                .andExpect(jsonPath("$.firstName").value(testStudent.getFirstName()))
                 .andExpect(jsonPath("$.age").value(testStudent.getAge()));
     }
 
@@ -79,7 +79,7 @@ public class StudentControllerTestWMT {
 
         when(studentService.creteStudent(any(Student.class))).thenReturn(testStudent);
 
-        mockMvc.perform(post("/student")
+        mockMvc.perform(post("/students")
                         .content(objectMapper.writeValueAsString(testStudent))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -89,16 +89,16 @@ public class StudentControllerTestWMT {
     void editStudent() throws Exception {
 
         Student testStudent = studentsTest.get(0);
-        testStudent.setName("New Name");
+        testStudent.setFirstName("New Name");
         testStudent.setAge(30);
 
         when(studentService.editStudent(testStudent)).thenReturn(testStudent);
 
-        mockMvc.perform(put("/student/" + testStudent.getId())
+        mockMvc.perform(put("/students/" + testStudent.getId())
                         .content(objectMapper.writeValueAsString(testStudent)
                         ).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(testStudent.getName()))
+                .andExpect(jsonPath("$.firstName").value(testStudent.getFirstName()))
                 .andExpect(jsonPath("$.age").value(testStudent.getAge()));
     }
 
@@ -109,14 +109,14 @@ public class StudentControllerTestWMT {
 
         when(studentService.deleteStudent(testStudent.getId())).thenReturn(testStudent);
 
-        mockMvc.perform(delete("/student/" + testStudent.getId()))
+        mockMvc.perform(delete("/students/" + testStudent.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(testStudent.getName()));
+                .andExpect(jsonPath("$.firstName").value(testStudent.getFirstName()));
     }
 
     @Test
     void returnBadRequestWhenIdIsNegative() throws Exception {
-        mockMvc.perform(get("/student/-5"))
+        mockMvc.perform(get("/students/-5"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -131,7 +131,7 @@ public class StudentControllerTestWMT {
 
         when(studentService.findByAge(age)).thenReturn(expectedStudent);
 
-        mockMvc.perform(get("/student")
+        mockMvc.perform(get("/students")
                         .param("age", String.valueOf(age)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(expectedStudent.size()));
@@ -149,7 +149,7 @@ public class StudentControllerTestWMT {
 
         when(studentService.findByAgeBetween(fromAge, toAge)).thenReturn(expectedStudent);
 
-        mockMvc.perform(get("/student/age")
+        mockMvc.perform(get("/students/age")
                         .param("from", String.valueOf(fromAge))
                         .param("to", String.valueOf(toAge)))
                 .andExpect(status().isOk())
@@ -162,7 +162,7 @@ public class StudentControllerTestWMT {
 
         when(studentService.exportStudentToCsv()).thenReturn(expectedContent);
 
-        mockMvc.perform(get("/student/export/csv"))
+        mockMvc.perform(get("/students/export/csv"))
                 .andExpect(status().isOk())
 
                 .andExpect(content().contentType("text/plain")) //тип контента должен быть text/csv

@@ -20,6 +20,9 @@ public class Avatar {
     @Column(name = "file_path")
     private String filePath;
 
+    @Column(name = "file_path_preview")
+    private String filePathPreview;
+
     @Column(name = "file_size")
     private long fileSize;
 
@@ -39,8 +42,9 @@ public class Avatar {
     @JoinColumn(name = "student_id")
     private Student student;
 
-    public Avatar(String filePath, long fileSize, String mediaType, byte[] data, byte[] preview, Student student) {
+    public Avatar(String filePath, String filePathPreview, long fileSize, String mediaType, byte[] data, byte[] preview, Student student) {
         this.filePath = filePath;
+        this.filePathPreview = filePathPreview;
         this.fileSize = fileSize;
         this.mediaType = mediaType;
         this.data = data;
@@ -92,6 +96,10 @@ public class Avatar {
         return filePath;
     }
 
+    public String getFilePathPreview() {
+        return filePathPreview;
+    }
+
     public long getFileSize() {
         return fileSize;
     }
@@ -122,6 +130,10 @@ public class Avatar {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public void setFilePathPreview(String filePathPreview) {
+        this.filePathPreview = filePathPreview;
     }
 
     public void setMediaType(String mediaType) {

@@ -2,7 +2,6 @@ package ru.hogwarts.school.controller;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +13,7 @@ import ru.hogwarts.school.model.Avatar;
 import ru.hogwarts.school.service.AvatarService;
 
 import java.io.IOException;
-
-import static org.springframework.http.HttpStatus.CREATED;
+import java.util.List;
 
 @Validated
 @RestController
@@ -35,15 +33,15 @@ public class AvatarController {
                 .body(avatarService.uploadAvatar(studentId, avatar));
     }
 
-    @GetMapping ("/{id}")
-    public Avatar findByIdStudent (@PathVariable @Positive Long id) {
-        return avatarService.findAvatarIdStudent(id);
+    @GetMapping ("student/{id}")
+    public ResponseEntity <AvatarDto> findByIdStudent (@PathVariable @Positive Long id) {
+        return ResponseEntity.ok(avatarService.findAvatarIdStudent(id));
     }
 
     @GetMapping("/{id}/data")
     public ResponseEntity<byte[]> getAvatarFromDb(@PathVariable @Positive Long id) {
 
-        Avatar avatar = avatarService.getAvatar(id);
+        Avatar avatar = avatarService.getAvatarOrThrow(id);
 
         return ResponseEntity
                 .ok()
@@ -54,7 +52,7 @@ public class AvatarController {
     @GetMapping("/{id}/preview")
     public ResponseEntity<byte[]> getPreview(@PathVariable @Positive Long id) {
 
-        Avatar avatar = avatarService.getAvatar(id);
+        Avatar avatar = avatarService.getAvatarOrThrow(id);
 
         return ResponseEntity
                 .ok()
@@ -65,7 +63,7 @@ public class AvatarController {
     @GetMapping("/{id}/path-file")
     public ResponseEntity<byte[]> getAvatarFromFile(@PathVariable @Positive Long id) throws IOException {
 
-        Avatar avatar = avatarService.getAvatar(id);
+        Avatar avatar = avatarService.getAvatarOrThrow(id);
 
         byte[] data = avatarService.getAvatarDataFromFile(id);
 
@@ -73,6 +71,11 @@ public class AvatarController {
                 .ok()
                 .contentType(MediaType.parseMediaType(avatar.getMediaType()))
                 .body(data);
+    }
+
+    @GetMapping ("/avatar-paging")
+    public ResponseEntity <List<AvatarDto>> getAvatarPaging (@RequestParam ("page") Integer pageNumber, @RequestParam ("size") Integer pageSize) {
+        return ResponseEntity.ok(avatarService.getAvatarPagingSorting(pageNumber, pageSize));
     }
 
 }

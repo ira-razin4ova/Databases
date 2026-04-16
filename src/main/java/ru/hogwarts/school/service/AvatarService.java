@@ -2,6 +2,7 @@ package ru.hogwarts.school.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.hogwarts.school.dto.avatar.AvatarDto;
@@ -49,7 +50,7 @@ public class AvatarService {
     }
 
     public AvatarDto uploadAvatar (Long id, MultipartFile file) throws IOException {
-        Student student = studentService.getStudentById(id);
+        Student student = studentService.getStudentOrThrow(id);
         String contentType = file.getContentType();
         if (contentType == null || !List.of("image/jpeg", "image/png", "image/gif", "image/webp", "image/svg").contains(contentType)) {
             throw new BadRequestException("Это не картинка! Грузи только jpeg, png или gif.");
@@ -94,7 +95,6 @@ public class AvatarService {
 
     public byte[] generateImagePreview (Path filePath) throws IOException {
         try (InputStream is = Files.newInputStream(filePath);
-             //OutputStream os = Files.newOutputStream(filePath, CREATE_NEW);
              BufferedInputStream bis = new BufferedInputStream(is, 1024);
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 
@@ -126,17 +126,24 @@ public class AvatarService {
         }
     }
 
-    public Avatar findAvatarIdStudent (Long id) {
-        return avatarRepository.findByStudentId(id)
+    public AvatarDto findAvatarIdStudent (Long id) {
+        Avatar avatar = avatarRepository.findByStudentId(id)
                 .orElseThrow(() -> new NotFoundException("Аватар для студента с id " + id + " не найден"));
+        return avatarMapper.toDto(avatar);
     }
-    public Avatar getAvatar(Long id) {
+    public Avatar getAvatarOrThrow(Long id) {
         return avatarRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Аватар с id " + id + " не найден"));
     }
 
     public byte[] getAvatarDataFromFile(Long id) throws IOException {
-        Avatar avatar = getAvatar(id);
+        Avatar avatar = getAvatarOrThrow(id);
         return Files.readAllBytes(Path.of(avatar.getFilePath()));
+    }
+
+    public List <AvatarDto> getAvatarPagingSorting (Integer pageNumber, Integer pageSize) {
+        PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize);
+        List <Avatar> avatars = avatarRepository.findAll(pageRequest).getContent();
+        return avatarMapper.toDtoList(avatars);
     }
 }

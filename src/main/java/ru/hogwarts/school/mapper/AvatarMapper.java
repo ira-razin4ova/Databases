@@ -1,17 +1,19 @@
 package ru.hogwarts.school.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.hogwarts.school.dto.avatar.AvatarDto;
 import ru.hogwarts.school.model.Avatar;
 
-@Component
-public class AvatarMapper {
+import java.util.List;
 
-    public AvatarDto toDto(Avatar avatar) {
-        return new AvatarDto(
-                avatar.getId(),
-                avatar.getFilePath(),
-                avatar.getFilePathPreview()
-        );
-    }
+@Mapper(componentModel = "spring")
+public interface AvatarMapper {
+
+    AvatarDto toDto(Avatar avatar);
+
+    @Mapping(source = "student.id", target = "studentId")
+
+    List<AvatarDto> toDtoList(List<Avatar> avatars);
+
 }

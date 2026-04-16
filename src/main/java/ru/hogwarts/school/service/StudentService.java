@@ -1,10 +1,12 @@
 package ru.hogwarts.school.service;
 
 import jakarta.transaction.Transactional;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.StudentDTO;
 import ru.hogwarts.school.exception.NotFoundException;
-import ru.hogwarts.school.mapper.StudentMapper;
+import ru.hogwarts.school.mapper.student.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
@@ -21,38 +23,48 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final FacultyRepository facultyRepository;
+    private final DataCodecService dataCodecService;
     private final StudentMapper studentMapper;
 
-    public StudentService(StudentRepository studentRepository, FacultyRepository facultyRepository, StudentMapper studentMapper) {
+    private final RestTemplateBuilder restTemplateBuilder;
+
+    public StudentService(StudentRepository studentRepository, FacultyRepository facultyRepository, DataCodecService dataCodecService, StudentMapper studentMapper,
+                          RestTemplateBuilder restTemplateBuilder) {
         this.studentRepository = studentRepository;
         this.facultyRepository = facultyRepository;
+        this.dataCodecService = dataCodecService;
         this.studentMapper = studentMapper;
+        this.restTemplateBuilder = restTemplateBuilder;
     }
 
-    public Student creteStudent(Student student) {
+    public StudentDTO createStudent(CreateStudentDto dto) {
+        Student student = studentMapper.toEntity(dto);
+        student.setPhoneNumber(dataCodecService.encodePhone(dto.getPhoneNumber()));
+        student.setFaculty(resolveFacultyOrThrow(dto.getIdFaculty()));
+        Student saved = studentRepository.save(student);
+        return studentMapper.toDto(saved);
+    }
 
-        if (student.getFaculty() == null || student.getFaculty().getId() == null) {
-            throw new NotFoundException("Не указан факультет или указан неверно!");
-        }
-        Faculty faculty = facultyRepository
-                .findById(student.getFaculty().getId())
+    public Faculty resolveFacultyOrThrow(Long id) {
+       return facultyRepository.findById(id)
                 .orElseThrow(() ->
                         new NotFoundException(
-                                "Факультет с id " + student.getFaculty().getId() + " не найден"
-                        )
+                                "Факультет с id " + id + " не найден")
                 );
-
-        student.setFaculty(faculty);
-
-        return studentRepository.save(student);
     }
 
 
-    public Student getStudentById(Long id) {
+    public Student getStudentOrThrow(Long id) {
         return studentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         "Пользователь с таким" + id +  "не найден"
                 ));
+    }
+
+    public StudentDTO getByIdDTO(Long id) {
+        Student student = getStudentOrThrow(id);
+
+        return studentMapper.toDto(student);
     }
 
     public Student editStudent(Student student) {
@@ -64,7 +76,7 @@ public class StudentService {
     }
 
     public Student deleteStudent(Long id) {
-        Student studentToDelete  = getStudentById(id);
+        Student studentToDelete  = getStudentOrThrow(id);
 
         studentRepository.delete(studentToDelete);
         return studentToDelete;
@@ -79,7 +91,7 @@ public class StudentService {
     }
 
     public Faculty getFacultyByStudentId(Long studentId) {
-        Student student = getStudentById(studentId);
+        Student student = getStudentOrThrow(studentId);
 
         if (student.getFaculty() == null) {
             throw new NotFoundException("Уточните информацию данный факультет отсутствует или указан неверно!");
@@ -110,16 +122,23 @@ public class StudentService {
         }
         return csv.toString();
     }
-
     public Map<Long, Student> studentMap(int age) {
         return studentRepository.findAll().stream()
                 .filter(student -> student.getAge() >= age)
                 .collect(Collectors.toMap(Student::getId, Function.identity(), (oldValue, newValue) -> newValue)); // делать при конфликте ID
     }
-    public StudentDTO getByIdDTO(Long id) {
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        return studentMapper.mapToDto(student);
+    public Long getStudentCount () {
+        return studentRepository.getStudentCount();
+    }
+
+    public Double getStudentAgeAvg () {
+        Double avg = studentRepository.getStudentAgeAVG();
+        return (avg != null) ? avg : 0.0;
+    }
+
+    public List <StudentDTO> getStudentLimitFiveSortedDesc () {
+        List <Student> students = studentRepository.getStudentLimitFive();
+        return studentMapper.toDtoList(students);
     }
 }

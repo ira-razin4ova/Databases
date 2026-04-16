@@ -1,7 +1,8 @@
 package ru.hogwarts.school.dto.student;
 
+import lombok.Setter;
 import ru.hogwarts.school.constant.StudentStatus;
-
+@Setter
 public class StudentDTO {
 
     private Long id;
@@ -12,15 +13,10 @@ public class StudentDTO {
     private Long avatarId;
     private String avatarPreviewPath;
     private StudentStatus studentStatus;
+    private String phoneNumber;
+    private String numberTicket;
 
-    public StudentDTO(Long id,
-                      int age,
-                      String firstName,
-                      String lastName,
-                      String faculty,
-                      Long avatarId,
-                      String avatarPreviewPath,
-                      StudentStatus studentStatus) {
+    public StudentDTO(Long id, int age, String firstName, String lastName, String faculty, Long avatarId, String avatarPreviewPath, StudentStatus studentStatus, String numberPhone, String numberTicket) {
         this.id = id;
         this.age = age;
         this.firstName = firstName;
@@ -29,6 +25,9 @@ public class StudentDTO {
         this.avatarId = avatarId;
         this.avatarPreviewPath = avatarPreviewPath;
         this.studentStatus = studentStatus;
+        this.phoneNumber = numberPhone;
+        this.numberTicket = numberTicket;
+
     }
 
     public int getAge() {
@@ -61,5 +60,13 @@ public class StudentDTO {
 
     public StudentStatus getStudentStatus() {
         return studentStatus;
+    }
+
+    public String getNumberPhone() {
+        return phoneNumber;
+    }
+
+    public String getNumberTicket() {
+        return numberTicket;
     }
 }

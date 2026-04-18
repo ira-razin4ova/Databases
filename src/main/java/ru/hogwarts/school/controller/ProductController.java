@@ -25,7 +25,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public Product getProductById(@PathVariable @Positive Long id) {
-        return productService.getProductById(id);
+        return productService.getProductOrThrow(id);
     }
 
     @PostMapping
@@ -46,8 +46,6 @@ public class ProductController {
     @GetMapping("/dto/{id}")
     public ResponseEntity<ProductDTO> getProductByIdDTO(@PathVariable Long id) {
         ProductDTO productDto = productService.getProductDtoById(id);
-
-        // 2. Отдаем его клиенту
         return ResponseEntity.ok(productDto);
     }
 

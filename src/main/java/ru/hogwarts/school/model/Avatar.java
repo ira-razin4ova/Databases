@@ -10,7 +10,7 @@ import java.util.Objects;
 @Table(name = "avatar")
 public class Avatar {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     public void setId(Long id) {

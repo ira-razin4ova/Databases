@@ -96,11 +96,14 @@ public class AvatarServiceTest {
         Student student3 = new Student(3L, "Марат", "Измалков",18, faculty1, StudentStatus.ACTIVE);
         Student student4 = new Student(4L, "Софья", "Афонина", 18, faculty1, StudentStatus.ACTIVE);
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4));
+
         dto = new AvatarDto(
                 1L,
                 "1.png",
-                "1_preview.png"
+                "1_preview.png",
+                1L
         );
+
         avatar = new Avatar();
         avatar.setId(1L);
         avatar.setFilePath("1.png");
@@ -180,7 +183,7 @@ public class AvatarServiceTest {
         Student testStudent = studentsTest.get(0);
 
 
-        when(studentService.getStudentById(1L))
+        when(studentService.getStudentOrThrow(1L))
                 .thenReturn(testStudent);
 
         when(avatarRepository.findByStudentId(1L))
@@ -216,7 +219,7 @@ public class AvatarServiceTest {
     void uploadAvatarNullFileTest() {
         Student testStudent = studentsTest.get(0);
 
-        when(studentService.getStudentById(testStudent.getId())).thenReturn(testStudent);
+        when(studentService.getStudentOrThrow(testStudent.getId())).thenReturn(testStudent);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 avatarService.uploadAvatar(1L, nullTypeFile));
@@ -233,7 +236,7 @@ public class AvatarServiceTest {
 
         when(avatarRepository.findById(10L)).thenReturn(Optional.of(expectedAvatar));
 
-        Avatar result = avatarService.getAvatar(10L);
+        Avatar result = avatarService.getAvatarOrThrow(10L);
 
         assertNotNull(result);
         assertEquals(expectedAvatar.getId(), result.getId());
@@ -243,17 +246,19 @@ public class AvatarServiceTest {
     void findAvatarByIdStudent() {
         Student testStudent = studentsTest.get(0);
         Avatar expectedAvatar = new Avatar();
-        expectedAvatar.setId(10L);
+        expectedAvatar.setId(1L);
         expectedAvatar.setStudent(testStudent);
         testStudent.setAvatar(expectedAvatar);
 
         when(avatarRepository.findByStudentId(testStudent.getId())).thenReturn(Optional.of(expectedAvatar));
+        when(avatarMapper.toDto(any(Avatar.class)))
+                .thenReturn(dto);
 
-        Avatar result = avatarService.findAvatarIdStudent(testStudent.getId());
+        AvatarDto result = avatarService.findAvatarIdStudent(testStudent.getId());
 
         assertNotNull(result);
-        assertEquals(expectedAvatar.getId(), result.getId(), "ID аватара должен быть 10");
-        assertEquals(testStudent.getId(), result.getStudent().getId(), "Это должен быть аватар нашего студента");
+        assertEquals(1L, result.getId(), "ID аватара должен быть 1");
+       assertEquals(testStudent.getId(), result.getStudentId(), "Это должен быть аватар нашего студента");
         assertEquals(testStudent.getAvatar().getId(), result.getId());
     }
 

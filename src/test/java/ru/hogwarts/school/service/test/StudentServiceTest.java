@@ -10,11 +10,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.hogwarts.school.constant.StudentStatus;
+import ru.hogwarts.school.dto.student.CreateStudentDto;
+import ru.hogwarts.school.dto.student.StudentDTO;
 import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.mapper.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
+import ru.hogwarts.school.service.DataCodecService;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.ArrayList;
@@ -29,7 +33,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class StudentServiceTest {
 
+    private List<StudentDTO> studentDtosTest;
     private List<Student> studentsTest;
+    private List<CreateStudentDto> createDtosTest;
     private List<Faculty> facultyTest;
 
     @BeforeEach
@@ -44,7 +50,30 @@ public class StudentServiceTest {
         Student student4 = new Student(4L, "Софья", "Афонина", 18, faculty1, StudentStatus.ACTIVE);
         Student student5 = new Student(5L, "Михаил", "Бачурин", 19, null, StudentStatus.ACTIVE);
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4, student5));
+// 1. Создаем StudentDTO (то, что маппер отдаст в конце)
+        StudentDTO sDto1 = new StudentDTO(1L, 23, "Артём", "Смирнов", "Химия", null, null, StudentStatus.ACTIVE, "79536160678", "123-456");
+        StudentDTO sDto2 = new StudentDTO(2L, 20, "Мария", "Леонова", "Химия", null, null, StudentStatus.ACTIVE, "79536160679", "123-457");
+        StudentDTO sDto3 = new StudentDTO(3L, 18, "Марат", "Измалков", "Химия", null, null, StudentStatus.ACTIVE, "79536160680", "123-458");
+        StudentDTO sDto4 = new StudentDTO(4L, 18, "Софья", "Афонина", "Химия", null, null, StudentStatus.ACTIVE, "79536160681", "123-459");
+        StudentDTO sDto5 = new StudentDTO(5L, 19, "Михаил", "Бачурин", null, null, null, StudentStatus.ACTIVE, "79536160682", "123-460");
+
+        studentDtosTest = new ArrayList<>(List.of(sDto1, sDto2, sDto3, sDto4, sDto5));
+
+// 2. Создаем CreateStudentDto (то, что придет в метод createStudent)
+        CreateStudentDto cDto1 = new CreateStudentDto(23, 1L, "Артём", "Смирнов", "79536160678", StudentStatus.ACTIVE, "123-456");
+        CreateStudentDto cDto2 = new CreateStudentDto(20, 1L, "Мария", "Леонова", "79536160679", StudentStatus.ACTIVE, "123-457");
+        CreateStudentDto cDto3 = new CreateStudentDto(18, 1L, "Марат", "Измалков", "79536160680", StudentStatus.ACTIVE, "123-458");
+        CreateStudentDto cDto4 = new CreateStudentDto(18, 1L, "Софья", "Афонина", "79536160681", StudentStatus.ACTIVE, "123-459");
+        CreateStudentDto cDto5 = new CreateStudentDto(19, null, "Михаил", "Бачурин", "79536160682", StudentStatus.ACTIVE, "123-460");
+
+        createDtosTest = new ArrayList<>(List.of(cDto1, cDto2, cDto3, cDto4, cDto5));
     }
+
+    @Mock
+    private StudentMapper studentMapper;
+
+    @Mock
+    private DataCodecService dataCodecService;
 
     @Mock
     private StudentRepository studentRepository;
@@ -52,50 +81,59 @@ public class StudentServiceTest {
     @Mock
     private FacultyRepository facultyRepository;
 
+    @Mock
+    private CreateStudentDto createStudentDto;
+
     @InjectMocks
     private StudentService studentService;
 
     @ParameterizedTest
     @ValueSource(ints = {0, 2, 3})
     void createStudent(int index) {
-        Student testStudent = studentsTest.get(index);
-        Faculty faculty = testStudent.getFaculty();
+        CreateStudentDto inputDto = createDtosTest.get(index);
+        Student mappedEntity = studentsTest.get(index);
+        Faculty faculty = mappedEntity.getFaculty();
+        StudentDTO expectedResult = studentDtosTest.get(index);
 
+        when(studentMapper.toEntity(inputDto)).thenReturn(mappedEntity);
+        when(dataCodecService.encodePhone(anyString())).thenReturn("ENCODED_123");
         when(facultyRepository.findById(faculty.getId())).thenReturn(Optional.of(faculty));
         // when(studentRepository.save(any(Student.class))).thenReturn(testStudent); // просто возвращает
         when(studentRepository.save(any(Student.class))).thenAnswer(i -> i.getArgument(0));// проверяем правильность создания перед отправкой в базу
-        Student result = studentService.creteStudent(testStudent);
+        when(studentMapper.toDto(any(Student.class))).thenReturn(expectedResult);
+        StudentDTO result = studentService.createStudent(inputDto);
 
         assertNotNull(result);
-        assertEquals(testStudent.getFirstName(), result.getFirstName());
-        assertEquals(faculty.getName(), result.getFaculty().getName());
+        assertEquals(expectedResult.getFirstName(), result.getFirstName());
+        assertEquals(expectedResult.getFaculty(), result.getFaculty());
         verify(studentRepository, times(1)).save(any(Student.class));
+        verify(dataCodecService).encodePhone(inputDto.getPhoneNumber());
     }
 
     @Test
-    void createStudentFacultyNull() {
-        Student testStudent = studentsTest.get(4);
-
+    void resolveFacultyOtThrowStudentFacultyNull() {
+        CreateStudentDto dto = createDtosTest.get(0);
+        when(facultyRepository.findById(dto.getIdFaculty())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () ->
-                studentService.creteStudent(testStudent));
+                studentService.resolveFacultyOrThrow(dto.getIdFaculty()));
         verify(studentRepository, never()).save(any());
     }
 
     @Test
-    void createStudentFacultyNotFound() {
-        Student testStudent = studentsTest.get(0);
-        when(facultyRepository.findById(testStudent.getFaculty().getId())).thenReturn(Optional.empty());
+    void resolveFacultyOtThrowStudentFacultyNotFound() {
+        Long id = 10L;
+        when(facultyRepository.findById(id)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () ->
-                studentService.creteStudent(testStudent));
+                studentService.resolveFacultyOrThrow(id));
     }
 
-    // @DisplayName("Поиск студента успешны")
+    @DisplayName("Поиск студента успешны")
     @Test
     void studentIdSuccess() {
         Long searchId = 1L;
         Student expectedStudent = studentsTest.get(0);
         when(studentRepository.findById(searchId)).thenReturn(Optional.of(expectedStudent));
-        Student result = studentService.getStudentById(searchId);
+        Student result = studentService.getStudentOrThrow(searchId);
         assertEquals(searchId, result.getId(), "ID вернувшегося студента должен быть равен запрошенному");
         verify(studentRepository).findById(searchId);
     }
@@ -105,7 +143,7 @@ public class StudentServiceTest {
     void studentNotFound(Long longs) {
         when(studentRepository.findById(longs)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () ->
-                studentService.getStudentById(longs));
+                studentService.getStudentOrThrow(longs));
         verify(studentRepository, times(1)).findById(longs);
     }
 
@@ -220,18 +258,19 @@ public class StudentServiceTest {
 
         Faculty result = studentService.getFacultyByStudentId(testStudent.getId());
         assertNotNull(result);
-      assertEquals(testStudent.getFaculty().getId(), result.getId());
-       assertEquals(testStudent.getFaculty().getName(), result.getName());
+        assertEquals(testStudent.getFaculty().getId(), result.getId());
+        assertEquals(testStudent.getFaculty().getName(), result.getName());
 
     }
 
     @Test
-    void findFacultyByStudentIdStudentFacultyIdNull () {
+    void findFacultyByStudentIdStudentFacultyIdNull() {
         Student testStudent = studentsTest.get(4);
 
         assertThrows(NotFoundException.class, () ->
                 studentService.getFacultyByStudentId(testStudent.getId()));
     }
+
     @Test
     void facultyNotFoundInRepository() {
         Student testStudent = studentsTest.get(0);
@@ -240,6 +279,7 @@ public class StudentServiceTest {
         assertThrows(NotFoundException.class, () ->
                 studentService.getFacultyByStudentId(testStudent.getId()));
     }
+
     @Test
     @DisplayName("Тест на экспорт студентов в CSV")
     void testExportToCsv() {

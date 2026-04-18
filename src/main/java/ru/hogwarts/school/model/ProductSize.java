@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import ru.hogwarts.school.constant.SizeType;
 
+import java.util.Objects;
+
 @Entity
 @Table (name = "product_size")
 public class ProductSize {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -65,5 +68,28 @@ public class ProductSize {
     }
     public int getSortOrder() {
         return sizeType != null ? sizeType.getSortOrder() : 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProductSize that = (ProductSize) o;
+        return Objects.equals(getId(), that.getId()) && getSizeType() == that.getSizeType() && Objects.equals(getQuantity(), that.getQuantity()) && Objects.equals(getProduct(), that.getProduct());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getSizeType(), getQuantity(), getProduct());
+    }
+
+    @Override
+    public String toString() {
+        return "ProductSize{" +
+                "id=" + id +
+                ", sizeType=" + sizeType +
+                ", quantity=" + quantity +
+                ", product=" + product +
+                '}';
     }
 }

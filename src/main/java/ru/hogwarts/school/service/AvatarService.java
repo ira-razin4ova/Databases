@@ -57,20 +57,19 @@ public class AvatarService {
         }
 
         Path filePath = Path.of (avatarsDir, id + "." + getExtension(file.getOriginalFilename()));
-        Files.createDirectories(filePath.getParent()); // проверяем папку
-        Files.deleteIfExists(filePath);// удаляем старый файл
+        Files.createDirectories(filePath.getParent());
+        Files.deleteIfExists(filePath);
 
         try (InputStream is = file.getInputStream();
              OutputStream os = Files.newOutputStream(filePath, CREATE_NEW);
              BufferedInputStream bis = new BufferedInputStream(is, 1024);
-             BufferedOutputStream bos = new BufferedOutputStream(os, 1024);
+             BufferedOutputStream bos = new BufferedOutputStream(os, 1024)
         ) {
             bis.transferTo(bos);
         }
-        // 2. генерим preview (в памяти)
+
         byte[] previewBytes = generateImagePreview(filePath);
 
-        // 3. СОХРАНЯЕМ preview в файл (ВОТ ЧЕГО НЕ ХВАТАЛО)
         Path previewPath = Path.of(avatarsDir,
                 id + "_preview." + getExtension(file.getOriginalFilename()));
 
@@ -102,25 +101,28 @@ public class AvatarService {
             if (image == null) {
                 throw new BadRequestException("Не удалось прочитать картинку!");
             }
+            /**
+              *Исправляем деление на ноль (через double)
+              * Исправляем тип 0 (TYPE_CUSTOM)
+             */
 
-            // 1. Исправляем деление на ноль (через double)
             double ratio = (double) image.getWidth() / 100;
             int height = (int) (image.getHeight() / ratio);
             if (height <= 0) height = 1;
-
-            // 2. Исправляем тип 0 (TYPE_CUSTOM)
             int type = (image.getType() == 0) ? BufferedImage.TYPE_INT_ARGB : image.getType();
 
             BufferedImage preview = new BufferedImage(100, height, type);
             Graphics2D graphics = preview.createGraphics();
 
-            // Добавляем сглаживание, чтобы превью не было "пиксельным"
+            /**
+             * Добавляем сглаживание, чтобы превью не было "пиксельным"
+             */
+
             graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
             graphics.drawImage(image, 0, 0, 100, height, null);
             graphics.dispose();
 
-            // 3. Сохраняем результат
             ImageIO.write(preview, getExtension(filePath.getFileName().toString()), baos);
             return baos.toByteArray();
         }

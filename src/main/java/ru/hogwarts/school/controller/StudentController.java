@@ -3,11 +3,13 @@ package ru.hogwarts.school.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.dto.product.ProductDTO;
+import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.StudentDTO;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -23,22 +25,20 @@ public class StudentController {
 
     private final StudentService studentService;
 
-    private final ProductService productService;
-
-    public StudentController(StudentService studentService,
-                             ProductService productService) {
+    public StudentController(StudentService studentService) {
         this.studentService = studentService;
-        this.productService = productService;
     }
 
     @GetMapping("{id}")
     public Student getStudent(@PathVariable @Positive Long id) {
-        return studentService.getStudentById(id);
+        return studentService.getStudentOrThrow(id);
     }
 
     @PostMapping
-    public Student createStudent(@RequestBody @Valid Student student) {
-        return studentService.creteStudent(student);
+    public ResponseEntity <StudentDTO> createStudent(@RequestBody @Valid CreateStudentDto dto) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(studentService.createStudent(dto));
     }
 
     @PutMapping("{id}")
@@ -66,8 +66,7 @@ public class StudentController {
 
     @GetMapping("/student/{id}/faculty")
     public ResponseEntity<Faculty> getFacultyByStudentId(@PathVariable @Positive Long id) {
-        Faculty faculty = studentService.getFacultyByStudentId(id);
-        return ResponseEntity.ok(faculty);
+        return ResponseEntity.ok(studentService.getFacultyByStudentId(id));
     }
 
     @GetMapping("/export/csv")
@@ -80,8 +79,21 @@ public class StudentController {
     }
     @GetMapping("/dto/{id}")
     public ResponseEntity<StudentDTO> getStudentByIdDTO(@PathVariable Long id) {
-        StudentDTO studentDTO = studentService.getByIdDTO(id);
+        return ResponseEntity.ok(studentService.getByIdDTO(id));
+    }
 
-        return ResponseEntity.ok(studentDTO);
+    @GetMapping ("/count")
+    public ResponseEntity <Long> getStudentCount () {
+        return ResponseEntity.ok(studentService.getStudentCount());
+    }
+
+    @GetMapping ("/age-avg")
+    public ResponseEntity <Double> getStudentAgeAvg () {
+        return ResponseEntity.ok(studentService.getStudentAgeAvg());
+    }
+
+    @GetMapping ("/limit")
+    public ResponseEntity  <List <StudentDTO>> getStudentLimit () {
+        return ResponseEntity.ok(studentService.getStudentLimitFiveSortedDesc());
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.hogwarts.school.controller.FacultyController;
+import ru.hogwarts.school.dto.faculty.FacultyDto;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.constant.StudentStatus;
@@ -59,6 +60,7 @@ public class FacultyControllerTestWMT {
     @Test
     void createFaculty() throws Exception {
         Faculty testFaculty = facultyTest.get(0);
+        FacultyDto dto = new FacultyDto(facultyTest.get(0).getId(), facultyTest.get(0).getName(),facultyTest.get(0).getColor());
 
         when(facultyService.createFaculty(any(Faculty.class))).thenReturn(testFaculty);
 
@@ -71,8 +73,10 @@ public class FacultyControllerTestWMT {
     @Test
     void facultyFindById() throws Exception {
         Faculty testFaculty = facultyTest.get(0);
+        FacultyDto dto = new FacultyDto(facultyTest.get(0).getId(), facultyTest.get(0).getName(),facultyTest.get(0).getColor());
 
-        when(facultyService.getFacultyById(testFaculty.getId())).thenReturn(testFaculty);
+
+        when(facultyService.getById(testFaculty.getId())).thenReturn(dto);
 
         mockMvc.perform(get("/faculty/" + testFaculty.getId()))
                 .andExpect(status().isOk())

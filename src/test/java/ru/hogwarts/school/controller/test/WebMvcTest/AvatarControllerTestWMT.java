@@ -61,29 +61,15 @@ public class AvatarControllerTestWMT {
 
     Student studentTest = new Student(1L, "Артём", "Смирнов", 23, facultyTest, StudentStatus.ACTIVE);
 
-//    @Test
-//    void uploadAvatar () throws Exception {
-//
-//        when(studentService.getStudentById(studentTest.getId())).thenReturn(studentTest);
-//
-//        Avatar testAvatar = new Avatar();
-//        testAvatar.setId(1L);
-//        testAvatar.setStudent(studentTest);
-//        testAvatar.setMediaType("image/png");
-//
-//        when(avatarService.uploadAvatar(eq(studentTest.getId()), any(MultipartFile.class))).thenReturn(testAvatar);
-//
-//        mockMvc.perform(multipart("/avatar/" + studentTest.getId() + "/upload")
-//                        .file(validImage))
-//                .andExpect(status().isOk());
-//    }
+
    @Test
     void uploadAvatar1() throws Exception {
 
         AvatarDto dto = new AvatarDto(
                 1L,
                 "path/to/file.png",
-                "path/to/preview.png"
+                "path/to/preview.png",
+                1L
         );
 
         when(avatarService.uploadAvatar(eq(studentTest.getId()), any(MultipartFile.class)))
@@ -97,17 +83,20 @@ public class AvatarControllerTestWMT {
     @Test
     void avatarByIdStudent () throws Exception {
 
-        Avatar newAvatar = new Avatar();
-        newAvatar.setId(1L);
-        newAvatar.setStudent(studentTest);
-        newAvatar.setMediaType("image/png");
+        AvatarDto dto = new AvatarDto(
+                1L,
+                "file.png",
+                "preview.png",
+                1L
+        );
 
-        when(avatarService.findAvatarIdStudent(studentTest.getId())).thenReturn(newAvatar);
+        when(avatarService.findAvatarIdStudent(studentTest.getId())).thenReturn(dto);
 
-        mockMvc.perform(get("/avatars/" + 1L))
-                .andExpect(status().isOk());
-//                .andExpect(jsonPath("$.id").value(1L))
-//                .andExpect(jsonPath("$.mediaType").value("image/png"));
+        mockMvc.perform(get("/avatars/student/" + 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.filePath").value("file.png"))
+                .andExpect(jsonPath("$.filePathPreview").value("preview.png"));
     }
 
 @Test
@@ -118,7 +107,7 @@ public class AvatarControllerTestWMT {
     newAvatar.setData(validImage.getBytes());
     newAvatar.setMediaType(validImage.getContentType());
 
-    when(avatarService.getAvatar(1L)).thenReturn(newAvatar);
+    when(avatarService.getAvatarOrThrow(1L)).thenReturn(newAvatar);
 
     mockMvc.perform(get("/avatars/" +1L +"/data"))
             .andExpect(status().isOk())
@@ -134,7 +123,7 @@ public class AvatarControllerTestWMT {
         newAvatar.setPreview(validImage.getBytes());
         newAvatar.setMediaType(validImage.getContentType());
 
-        when(avatarService.getAvatar(1L)).thenReturn(newAvatar);
+        when(avatarService.getAvatarOrThrow(1L)).thenReturn(newAvatar);
 
         mockMvc.perform(get("/avatars/" +1L +"/preview"))
                 .andExpect(status().isOk())
@@ -150,7 +139,7 @@ public class AvatarControllerTestWMT {
         newAvatar.setMediaType(validImage.getContentType());
         newAvatar.setFilePath("src/test/resources/avatars/avatar.png");
 
-        when(avatarService.getAvatar(1L)).thenReturn(newAvatar);
+        when(avatarService.getAvatarOrThrow(1L)).thenReturn(newAvatar);
 
         when(avatarService.getAvatarDataFromFile(1L)).thenReturn(newAvatar.getData());
 
@@ -158,7 +147,7 @@ public class AvatarControllerTestWMT {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "image/png"))
                 .andExpect(content().bytes(validImage.getBytes()));
-        verify(avatarService).getAvatar(1L);
+        verify(avatarService).getAvatarOrThrow(1L);
         verify(avatarService).getAvatarDataFromFile(1L);
     }
 

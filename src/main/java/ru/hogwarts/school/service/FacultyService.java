@@ -2,7 +2,9 @@ package ru.hogwarts.school.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.dto.faculty.FacultyDto;
 import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.mapper.FacultyMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
@@ -16,19 +18,25 @@ public class FacultyService {
 
     private final FacultyRepository facultyRepository;
     private final StudentRepository studentRepository;
+    private final FacultyMapper facultyMapper;
 
-    public FacultyService(FacultyRepository facultyRepository, StudentRepository studentRepository) {
+    public FacultyService(FacultyRepository facultyRepository, StudentRepository studentRepository, FacultyMapper facultyMapper) {
         this.facultyRepository = facultyRepository;
         this.studentRepository = studentRepository;
+        this.facultyMapper = facultyMapper;
     }
 
     public Faculty createFaculty(Faculty faculty) {
         return facultyRepository.save(faculty);
     }
 
-    public Faculty getFacultyById(Long id) {
+    public Faculty getFacultyOrThrow(Long id) {
         return facultyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Факультет с таким " + id +  " не найден"));
+    }
+
+    public FacultyDto getById (Long id) {
+        return facultyMapper.toDto(getFacultyOrThrow(id));
     }
 
     public Faculty editFaculty(Faculty faculty) {
@@ -47,7 +55,7 @@ public class FacultyService {
         facultyRepository.deleteById(id);
     }
 
-    public List<Faculty> search(String name, String color) {
+    public List<Faculty> searchNameOrColor(String name, String color) {
         String searchName = (name == null) ? "" : name;
         String searchColor = (color == null) ? "" : color;
 

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ru.hogwarts.school.constant.StudentStatus;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Getter
@@ -14,7 +15,7 @@ import java.util.Objects;
 @Table(name = "student")
 public class Student {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "first_name", nullable = false)
@@ -38,6 +39,17 @@ public class Student {
     @Enumerated(EnumType.STRING)
     private StudentStatus studentStatus;
 
+    @Column (name = "phone_number")
+    private String phoneNumber;
+
+    @Column (name = "course")
+    private Integer course;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal balance;
+
+    @Column (name = "student_tiсket")
+    private String studentTicket;
     public Student(Long id, String firstName, String lastName, int age, Faculty faculty, StudentStatus studentStatus) {
         this.id = id;
         this.firstName = firstName;

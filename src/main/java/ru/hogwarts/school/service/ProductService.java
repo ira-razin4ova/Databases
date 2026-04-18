@@ -26,29 +26,17 @@ public class ProductService {
     private final FacultyRepository facultyRepository;
     private final ProductMapper productMapper;
 
-    public Product getProductById(Long id) {
-        return productRepository.findById(id).orElseThrow(() -> new NotFoundException("Продукт не найден"));
+    public Product getProductOrThrow(Long id) {
+        return productRepository.findById(id).orElseThrow(() -> new NotFoundException("Продукт с id " + id + " не найден"));
     }
 
     public Product createProduct(Product product) {
-        addSizeInProduct(product);
         resolveCategory(product);
         resolveFaculty(product);
+        addSizeInProduct(product);
         return productRepository.save(product);
     }
 
-
-    @Transactional
-    public void deleteProduct(Long id) {
-        Product deleteProduct = getProductById(id);
-        productRepository.delete(deleteProduct);
-    }
-
-    public void addSizeInProduct(Product product) {
-        if (product.getSizes() != null) {
-            product.getSizes().forEach(size -> size.setProduct(product));
-        }
-    }
 
     public void resolveCategory(Product product) {
         if (product.getCategory() != null && product.getCategory().getId() != null) {
@@ -59,7 +47,8 @@ public class ProductService {
             product.setCategory(existingCategory);
         }
     }
-    public void resolveFaculty (Product product) {
+
+    public void resolveFaculty(Product product) {
         if (product.getFaculties() != null && !product.getFaculties().isEmpty()) {
             List<Long> ids = product.getFaculties().stream()
                     .map(Faculty::getId)
@@ -74,11 +63,24 @@ public class ProductService {
         }
     }
 
+    public void addSizeInProduct(Product product) {
+        if (product.getSizes() != null) {
+            product.getSizes().forEach(size -> size.setProduct(product));
+        }
+    }
+
     public List<ProductSize> findAllSizesByProductId(Long id) {
         return productRepository.findAllSizesByProductId(id);
     }
+
     public ProductDTO getProductDtoById(Long id) {
-        Product product = getProductById(id);
+        Product product = getProductOrThrow(id);
         return productMapper.toDto(product);
+    }
+
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product deleteProduct = getProductOrThrow(id);
+        productRepository.delete(deleteProduct);
     }
 }

@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.hogwarts.school.constant.StudentStatus;
-import ru.hogwarts.school.exception.BadRequestException;
 import ru.hogwarts.school.exception.NotFoundException;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -82,7 +81,7 @@ public class FacultyServiceTest {
 
         when(facultyRepository.findById(id)).thenReturn(Optional.of(testfaculty));
 
-        Faculty result = facultyService.getFacultyById(id);
+        Faculty result = facultyService.getFacultyOrThrow(id);
 
         assertNotNull(result);
         assertEquals(testfaculty.getId(), result.getId());
@@ -99,7 +98,7 @@ public class FacultyServiceTest {
         when(facultyRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () ->
-                facultyService.getFacultyById(id));
+                facultyService.getFacultyOrThrow(id));
 
     }
 
@@ -107,7 +106,7 @@ public class FacultyServiceTest {
     @NullSource
     void facultyByIdNull(Long argument) {
         assertThrows(NotFoundException.class, () ->
-                facultyService.getFacultyById(argument));
+                facultyService.getFacultyOrThrow(argument));
     }
 
     @ParameterizedTest
@@ -225,7 +224,7 @@ public class FacultyServiceTest {
 
                 // 2. Ловим исключение
                 NotFoundException exception = assertThrows(NotFoundException.class, () ->
-                        facultyService.getFacultyById(id)
+                        facultyService.getFacultyOrThrow(id)
                 );
 
                 // 3. Проверяем твой текст ошибки

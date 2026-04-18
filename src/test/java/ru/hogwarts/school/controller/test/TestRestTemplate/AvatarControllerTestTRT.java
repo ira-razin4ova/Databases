@@ -9,6 +9,8 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import ru.hogwarts.school.controller.AvatarController;
+import ru.hogwarts.school.dto.avatar.AvatarDto;
+import ru.hogwarts.school.mapper.AvatarMapper;
 import ru.hogwarts.school.model.Avatar;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -43,6 +45,9 @@ public class AvatarControllerTestTRT {
     private AvatarRepository avatarRepository;
 
     @Autowired
+private AvatarMapper avatarMapper;
+
+    @Autowired
     private TestRestTemplate testRestTemplate;
 
     // Вспомогательный методы
@@ -62,6 +67,7 @@ public class AvatarControllerTestTRT {
         avatar.setFileSize(100L);
         avatar.setData(new byte[]{1, 2, 3});
         avatar.setPreview(new byte[]{1, 2, 3});
+        avatar.setFilePathPreview("test/path/" + student.getId() + "preview.png");;
         return avatarRepository.save(avatar);
     }
 
@@ -122,10 +128,12 @@ public class AvatarControllerTestTRT {
         Avatar testAvatar = createTestAvatar(testStudent);
         Long id = testStudent.getId();
 
-        ResponseEntity<Avatar> response = testRestTemplate.getForEntity(
-                "http://localhost:" + port + "/avatars/" + id,
-                Avatar.class
+        ResponseEntity<AvatarDto> response = testRestTemplate.getForEntity(
+                "http://localhost:" + port + "/avatars/student/" + id,
+                AvatarDto.class
         );
+        System.out.println("ТЕЛО ОШИБКИ: " + response.getBody());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -151,7 +159,7 @@ public class AvatarControllerTestTRT {
       }
     };
 
-        body.add("avatar", contentsAsResource);
+     body.add("avatar", contentsAsResource);
 
         ResponseEntity<String> response = testRestTemplate.postForEntity("http://localhost:" + port + "/avatars/" + testStudent.getId() + "/upload",
                 new HttpEntity<>(body, new HttpHeaders()), String.class

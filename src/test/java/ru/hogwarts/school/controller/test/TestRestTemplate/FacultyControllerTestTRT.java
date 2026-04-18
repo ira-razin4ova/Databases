@@ -48,7 +48,7 @@ public class FacultyControllerTestTRT {
                 String.class
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).contains("Ошибка валидации:");
+        assertThat(response.getBody()).contains("должно быть больше 0");
     }
 
     @Test
@@ -59,7 +59,7 @@ public class FacultyControllerTestTRT {
         assertThat(response.getBody().getId()).isNotNull();
         assertEquals(response.getBody().getId(), id);
         assertThat(facultyRepository.existsById(id)).isTrue();
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     }
 
     @Test

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.dto.faculty.FacultyDto;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.FacultyService;
@@ -21,9 +22,9 @@ public class FacultyController {
         this.facultyService = facultyService;
     }
 
-    @GetMapping("{id}")
-    public Faculty getFaculty(@PathVariable @Positive Long id) {
-        return facultyService.getFacultyById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity <FacultyDto> getByIdFaculty(@PathVariable @Positive Long id) {
+        return ResponseEntity.ok(facultyService.getById(id));
     }
 
     @PostMapping
@@ -47,7 +48,7 @@ public class FacultyController {
     @GetMapping("/search")
     public List<Faculty> findByFields(@RequestParam(required = false) String name,
                                       @RequestParam(required = false) String color) {
-        return facultyService.search(name, color);
+        return facultyService.searchNameOrColor(name, color);
     }
 
     @GetMapping

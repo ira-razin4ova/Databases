@@ -9,10 +9,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.hogwarts.school.controller.StudentController;
+import ru.hogwarts.school.dto.student.CreateStudentDto;
+import ru.hogwarts.school.dto.student.StudentDTO;
+import ru.hogwarts.school.mapper.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.constant.StudentStatus;
 import ru.hogwarts.school.repository.FacultyRepository;
+import ru.hogwarts.school.service.DataCodecService;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.ArrayList;
@@ -41,6 +45,12 @@ public class StudentControllerTestWMT {
     @MockitoBean
     private StudentService studentService;
 
+    @MockitoBean
+    private DataCodecService dataCodecService;
+
+    @MockitoBean
+    private StudentMapper studentMapper;
+
     private List<Student> studentsTest;
     private List<Faculty> facultyTest;
 
@@ -55,7 +65,6 @@ public class StudentControllerTestWMT {
         Student student2 = new Student(2L, "Мария", "Зайцева", 20, faculty1, StudentStatus.ACTIVE);
         Student student3 = new Student(3L, "Марат", "Афонин", 18, faculty1, StudentStatus.ACTIVE);
         Student student4 = new Student(4L, "Михаил", "Башаров", 19, null, StudentStatus.ACTIVE);
-
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4));
     }
 
@@ -64,7 +73,7 @@ public class StudentControllerTestWMT {
 
         Student testStudent = studentsTest.get(0);
 
-        when(studentService.getStudentById(testStudent.getId())).thenReturn(testStudent);
+        when(studentService.getStudentOrThrow(testStudent.getId())).thenReturn(testStudent);
 
         mockMvc.perform(get("/students/" + testStudent.getId()))
                 .andExpect(status().isOk())
@@ -75,14 +84,15 @@ public class StudentControllerTestWMT {
     @Test
     void createStudent() throws Exception {
 
-        Student testStudent = studentsTest.get(0);
+        CreateStudentDto cDto1 = new CreateStudentDto(23, 1L, "Артём", "Смирнов", "79536160678", StudentStatus.ACTIVE, "123-456");
+        StudentDTO sDto1 = new StudentDTO(1L, 23, "Артём", "Смирнов", "Химия", null, null, StudentStatus.ACTIVE, "79536160678", "123-456");
 
-        when(studentService.creteStudent(any(Student.class))).thenReturn(testStudent);
+        when(studentService.createStudent(any(CreateStudentDto.class))).thenReturn(sDto1);
 
         mockMvc.perform(post("/students")
-                        .content(objectMapper.writeValueAsString(testStudent))
+                        .content(objectMapper.writeValueAsString(cDto1))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test

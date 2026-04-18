@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,7 +17,7 @@ import java.util.Objects;
 @Table(name = "faculty")
 public class Faculty {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name", nullable = false)
@@ -28,6 +29,9 @@ public class Faculty {
     @OneToMany(mappedBy = "faculty") // ленивый по умолчанию
     @JsonIgnore
     private List<Student> students = new ArrayList<>();
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal balance;
 
 
 
@@ -45,7 +49,7 @@ public class Faculty {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Faculty faculty = (Faculty) o;
-        return id == faculty.id && Objects.equals(name, faculty.name) && Objects.equals(color, faculty.color);
+        return Objects.equals(getId(), faculty.getId()) && Objects.equals(name, faculty.name) && Objects.equals(color, faculty.color);
 
     }
 

@@ -2,14 +2,12 @@ package ru.hogwarts.school.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Getter;
 import lombok.Setter;
 import ru.hogwarts.school.constant.StudentStatus;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@Getter
 @Setter
 @Entity
 @Table(name = "student")
@@ -32,24 +30,25 @@ public class Student {
     @JsonIgnoreProperties("student")
     private Faculty faculty;
 
-    @OneToOne (mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private Avatar avatar;
 
-    @Column (name = "student_status")
+    @Column(name = "student_status")
     @Enumerated(EnumType.STRING)
     private StudentStatus studentStatus;
 
-    @Column (name = "phone_number")
+    @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column (name = "course")
+    @Column(name = "course")
     private Integer course;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal balance;
 
-    @Column (name = "student_tiсket")
+    @Column(name = "student_tiсket")
     private String studentTicket;
+
     public Student(Long id, String firstName, String lastName, int age, Faculty faculty, StudentStatus studentStatus) {
         this.id = id;
         this.firstName = firstName;
@@ -82,5 +81,49 @@ public class Student {
                 ", id=" + id +
                 ", name='" + firstName + '\'' +
                 '}';
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public String getFirstName() {
+        return this.firstName;
+    }
+
+    public String getLastName() {
+        return this.lastName;
+    }
+
+    public int getAge() {
+        return this.age;
+    }
+
+    public Faculty getFaculty() {
+        return this.faculty;
+    }
+
+    public Avatar getAvatar() {
+        return this.avatar;
+    }
+
+    public StudentStatus getStudentStatus() {
+        return this.studentStatus;
+    }
+
+    public String getPhoneNumber() {
+        return this.phoneNumber;
+    }
+
+    public Integer getCourse() {
+        return this.course;
+    }
+
+    public BigDecimal getBalance() {
+        return this.balance;
+    }
+
+    public String getStudentTicket() {
+        return this.studentTicket;
     }
 }

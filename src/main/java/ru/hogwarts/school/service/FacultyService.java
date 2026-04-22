@@ -1,18 +1,20 @@
 package ru.hogwarts.school.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.dto.faculty.CreateFacultyDto;
 import ru.hogwarts.school.dto.faculty.FacultyDto;
+import ru.hogwarts.school.dto.faculty.PatchFacultyDto;
+import ru.hogwarts.school.dto.student.StudentDTO;
 import ru.hogwarts.school.exception.NotFoundException;
 import ru.hogwarts.school.mapper.FacultyMapper;
 import ru.hogwarts.school.model.Faculty;
-import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.List;
 
-@Transactional
+@Transactional(readOnly = true)
 @Service
 public class FacultyService {
 
@@ -26,8 +28,11 @@ public class FacultyService {
         this.facultyMapper = facultyMapper;
     }
 
-    public Faculty createFaculty(Faculty faculty) {
-        return facultyRepository.save(faculty);
+    @Transactional
+    public FacultyDto createFaculty(CreateFacultyDto dto) {
+        Faculty faculty = facultyMapper.toEntity(dto);
+
+        return facultyMapper.toDto(faculty);
     }
 
     public Faculty getFacultyOrThrow(Long id) {
@@ -38,6 +43,16 @@ public class FacultyService {
     public FacultyDto getById (Long id) {
         return facultyMapper.toDto(getFacultyOrThrow(id));
     }
+
+    @Transactional
+    public FacultyDto patchFaculty(Long id, PatchFacultyDto dto) {
+        Faculty faculty = getFacultyOrThrow(id);
+
+        facultyMapper.updateEntityFromPatchDto(dto, faculty);
+
+        return facultyMapper.toDto(faculty);
+    }
+
 
     public Faculty editFaculty(Faculty faculty) {
         if (!facultyRepository.existsById(faculty.getId())) {
@@ -55,18 +70,18 @@ public class FacultyService {
         facultyRepository.deleteById(id);
     }
 
-    public List<Faculty> searchNameOrColor(String name, String color) {
+    public List<FacultyDto> searchNameOrColor(String name, String color) {
         String searchName = (name == null) ? "" : name;
         String searchColor = (color == null) ? "" : color;
 
         return facultyRepository.findByRussianNameOrColor(searchName, searchColor);
     }
 
-    public List<Faculty> findByNameOrColor(String name, String color) {
+    public List<FacultyDto> findByNameOrColor(String name, String color) {
         return facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color);
     }
 
-    public List<Student> studentsFacultyById(Long facultyId) {
+    public List<StudentDTO> studentsFacultyById(Long facultyId) {
         return studentRepository.findByFaculty_Id(facultyId);
     }
 

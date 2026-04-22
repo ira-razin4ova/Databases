@@ -3,11 +3,14 @@ package ru.hogwarts.school.exception;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class SchoolControllerAdvice {
@@ -46,13 +49,35 @@ public class SchoolControllerAdvice {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler (MethodArgumentNotValidException.class)
+    public ResponseEntity <SchoolError> handleMethodArgumentNotValidException (MethodArgumentNotValidException ex) {
+
+        FieldError fieldError = ex.getBindingResult().getFieldError();
+
+        String message = (fieldError != null)
+                ? String.format("%s: %s", fieldError.getField(), fieldError.getDefaultMessage())
+                : "Ошибка валидации";
+
+        SchoolError error = new SchoolError(
+                HttpStatus.BAD_REQUEST.name(),
+                message
+        );
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<SchoolError> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
 
+        String requiredType = (ex.getRequiredType() != null)
+                ? ex.getRequiredType().getSimpleName()
+                : "unknown";
+
         String message = String.format(
-                "Invalid value '%s' for parameter '%s'",
+                "Параметр '%s' имеет неверное значение '%s'. Ожидаемый тип: %s",
+                ex.getName(),
                 ex.getValue(),
-                ex.getName()
+                requiredType
         );
 
         SchoolError error = new SchoolError(

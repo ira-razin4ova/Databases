@@ -1,6 +1,10 @@
 package ru.hogwarts.school.dto.avatar;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Setter
 public class AvatarDto {
     private Long id;
     private String filePath;

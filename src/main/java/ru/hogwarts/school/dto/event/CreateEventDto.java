@@ -1,7 +1,7 @@
 package ru.hogwarts.school.dto.event;
 
 
-import ru.hogwarts.school.dto.task.TaskDto;
+import ru.hogwarts.school.dto.task.CreateTaskDto;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +14,6 @@ public record CreateEventDto(
         LocalDateTime dateStart,
         LocalDateTime dateEnd,
         Boolean archive,
-        List<TaskDto> tasks,
+        List <CreateTaskDto> tasks,
         Integer targetCourse)
 { }

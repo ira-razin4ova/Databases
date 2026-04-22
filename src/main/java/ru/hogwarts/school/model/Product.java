@@ -46,7 +46,8 @@ public class Product {
     private String mainPic;
 
     @ElementCollection
-    @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
+    @CollectionTable(name = "product_images",
+                     joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
     private List<String> images = new ArrayList<>();
 
@@ -65,6 +66,5 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<ProductSize> sizes = new ArrayList<>();
-
 
 }

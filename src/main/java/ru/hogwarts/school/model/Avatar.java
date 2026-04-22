@@ -1,6 +1,7 @@
 package ru.hogwarts.school.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.util.Arrays;
@@ -38,7 +39,7 @@ public class Avatar {
     private byte[] preview;
 
     @OneToOne
-    @JsonIgnore
+    @JsonIgnoreProperties("student")
     @JoinColumn(name = "student_id")
     private Student student;
 

@@ -2,17 +2,22 @@ package ru.hogwarts.school.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.dto.faculty.FacultyDto;
+import ru.hogwarts.school.dto.faculty.PatchFacultyDto;
 import ru.hogwarts.school.dto.product.ProductDTO;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
+import ru.hogwarts.school.dto.student.PatchStudentDto;
 import ru.hogwarts.school.dto.student.StudentDTO;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.service.FacultyService;
 import ru.hogwarts.school.service.ProductService;
 import ru.hogwarts.school.service.StudentService;
 
@@ -25,8 +30,12 @@ public class StudentController {
 
     private final StudentService studentService;
 
-    public StudentController(StudentService studentService) {
+    private final FacultyService facultyService;
+
+    public StudentController(StudentService studentService,
+                             FacultyService facultyService) {
         this.studentService = studentService;
+        this.facultyService = facultyService;
     }
 
     @GetMapping("{id}")
@@ -40,6 +49,13 @@ public class StudentController {
                 .status(HttpStatus.CREATED)
                 .body(studentService.createStudent(dto));
     }
+    @PatchMapping("/{id}")
+    public ResponseEntity<StudentDTO> patchStudent(
+            @PathVariable Long id,
+            @Valid @RequestBody PatchStudentDto dto)
+    {
+        return ResponseEntity.ok(studentService.patchStudent(id,dto));
+    }
 
     @PutMapping("{id}")
     public Student updateStudent(@PathVariable @Positive Long id,
@@ -49,19 +65,20 @@ public class StudentController {
     }
 
     @DeleteMapping("{id}")
-    public Student deleteStudent(@PathVariable @Positive Long id) {
-        return studentService.deleteStudent(id);
+    public ResponseEntity<String> deleteStudent(@PathVariable @Positive Long id) {
+        studentService.deleteStudent(id);
+        return ResponseEntity.ok("Студент с id " + id + " успешно удалена");
     }
 
     @GetMapping
-    public List<Student> getStudentsByAge(@RequestParam int age) {
-        return studentService.findByAge(age);
+    public ResponseEntity <List<StudentDTO>> getStudentsByAge(@RequestParam int age) {
+        return ResponseEntity.ok(studentService.findByAge(age));
     }
 
     @GetMapping("/age")
-    public List<Student> getFindByAgeBetween(@RequestParam int from,
+    public ResponseEntity <List<StudentDTO>> getFindByAgeBetween(@RequestParam int from,
                                              @RequestParam int to) {
-        return studentService.findByAgeBetween(from, to);
+        return ResponseEntity.ok(studentService.findByAgeBetween(from, to));
     }
 
     @GetMapping("/student/{id}/faculty")
@@ -78,8 +95,9 @@ public class StudentController {
         return ResponseEntity.ok().headers(headers).body(data);
     }
     @GetMapping("/dto/{id}")
-    public ResponseEntity<StudentDTO> getStudentByIdDTO(@PathVariable Long id) {
-        return ResponseEntity.ok(studentService.getByIdDTO(id));
+    public ResponseEntity<String> getStudentByIdDTO(@PathVariable Long id) {
+        studentService.getByIdDTO(id);
+        return ResponseEntity.ok("Студент с id " + id + " успешно удалена");
     }
 
     @GetMapping ("/count")

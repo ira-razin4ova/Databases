@@ -50,14 +50,19 @@ public class EventService {
     }
 
     @Transactional
-    public EventDto createEvent(CreateEventDto dto) {
+    public EventFullDto createEvent(CreateEventDto dto) {
         Event event = eventMapper.toEntity(dto);
 
+       linkTasksToEvent(event);
+
+        Event savedEvent = eventRepository.save(event);
+        return eventMapper.toDtoFull(savedEvent);
+    }
+
+    private void linkTasksToEvent(Event event) {
         if (event.getTasks() != null) {
             event.getTasks().forEach(task -> task.setEvent(event));
         }
-        Event savedEvent = eventRepository.save(event);
-        return eventMapper.toDto(savedEvent);
     }
 
     @Transactional

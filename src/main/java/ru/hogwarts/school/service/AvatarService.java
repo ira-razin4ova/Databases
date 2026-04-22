@@ -1,6 +1,6 @@
 package ru.hogwarts.school.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -52,7 +52,7 @@ public class AvatarService {
     public AvatarDto uploadAvatar (Long id, MultipartFile file) throws IOException {
         Student student = studentService.getStudentOrThrow(id);
         String contentType = file.getContentType();
-        if (contentType == null || !List.of("image/jpeg", "image/png", "image/gif", "image/webp", "image/svg").contains(contentType)) {
+        if (contentType == null || !List.of("image/jpeg", "image/png", "image/gif").contains(contentType)) {
             throw new BadRequestException("Это не картинка! Грузи только jpeg, png или gif.");
         }
 

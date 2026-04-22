@@ -10,10 +10,11 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface AvatarMapper {
 
-    AvatarDto toDto(Avatar avatar);
-
     @Mapping(source = "student.id", target = "studentId")
-
+    AvatarDto toDto(Avatar avatar);
+    
     List<AvatarDto> toDtoList(List<Avatar> avatars);
+
+
 
 }

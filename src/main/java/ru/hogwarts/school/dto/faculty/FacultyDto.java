@@ -1,10 +1,10 @@
 package ru.hogwarts.school.dto.faculty;
 
-import lombok.Value;
+import java.math.BigDecimal;
 
-@Value
-public class FacultyDto {
-    Long id;
-    String name;
-    String color;
+public record FacultyDto(
+        Long id,
+        String name,
+        String color,
+        BigDecimal balance) {
 }

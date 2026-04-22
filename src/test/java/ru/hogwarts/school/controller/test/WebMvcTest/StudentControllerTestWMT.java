@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.hogwarts.school.controller.StudentController;
+import ru.hogwarts.school.dto.avatar.AvatarDto;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.StudentDTO;
 import ru.hogwarts.school.mapper.StudentMapper;
@@ -85,7 +86,8 @@ public class StudentControllerTestWMT {
     void createStudent() throws Exception {
 
         CreateStudentDto cDto1 = new CreateStudentDto(23, 1L, "Артём", "Смирнов", "79536160678", StudentStatus.ACTIVE, "123-456");
-        StudentDTO sDto1 = new StudentDTO(1L, 23, "Артём", "Смирнов", "Химия", null, null, StudentStatus.ACTIVE, "79536160678", "123-456");
+        AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", 1L);
+        StudentDTO sDto1 = new StudentDTO(1L, 23, "Артём", "Смирнов", "Химия",avatarDto , StudentStatus.ACTIVE, "79536160678", "123-456");
 
         when(studentService.createStudent(any(CreateStudentDto.class))).thenReturn(sDto1);
 

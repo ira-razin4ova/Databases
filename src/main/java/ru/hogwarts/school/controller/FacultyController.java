@@ -2,10 +2,14 @@ package ru.hogwarts.school.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.dto.faculty.CreateFacultyDto;
 import ru.hogwarts.school.dto.faculty.FacultyDto;
+import ru.hogwarts.school.dto.faculty.PatchFacultyDto;
+import ru.hogwarts.school.dto.student.StudentDTO;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.FacultyService;
@@ -28,8 +32,18 @@ public class FacultyController {
     }
 
     @PostMapping
-    public Faculty createFaculty(@RequestBody @Valid Faculty faculty) {
-        return facultyService.createFaculty(faculty);
+    public ResponseEntity <FacultyDto> createFaculty(@RequestBody @Valid CreateFacultyDto dto) {
+        return ResponseEntity.
+                status(HttpStatus.CREATED)
+                .body(facultyService.createFaculty(dto));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<FacultyDto> patchFaculty(
+            @PathVariable Long id,
+            @Valid @RequestBody PatchFacultyDto dto)
+    {
+        return ResponseEntity.ok(facultyService.patchFaculty(id,dto));
     }
 
     @PutMapping("{id}")
@@ -46,19 +60,19 @@ public class FacultyController {
     }
 
     @GetMapping("/search")
-    public List<Faculty> findByFields(@RequestParam(required = false) String name,
+    public ResponseEntity <List<FacultyDto>>  findByFields(@RequestParam(required = false) String name,
                                       @RequestParam(required = false) String color) {
-        return facultyService.searchNameOrColor(name, color);
+        return ResponseEntity.ok(facultyService.searchNameOrColor(name, color));
     }
 
     @GetMapping
-    public List<Faculty> getFindByNameOrColor(@RequestParam(required = false) String name,
+    public List<FacultyDto> getFindByNameOrColor(@RequestParam(required = false) String name,
                                               @RequestParam(required = false) String color) {
         return facultyService.findByNameOrColor(name, color);
     }
 
     @GetMapping("{id}/faculty")
-    public List<Student> getFindStudentByIdFaculty(@PathVariable @Positive Long id) {
+    public List<StudentDTO> getFindStudentByIdFaculty(@PathVariable @Positive Long id) {
         return facultyService.studentsFacultyById(id);
     }
 }

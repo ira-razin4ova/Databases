@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.hogwarts.school.constant.StudentStatus;
+import ru.hogwarts.school.dto.avatar.AvatarDto;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.StudentDTO;
 import ru.hogwarts.school.exception.NotFoundException;
@@ -40,6 +41,7 @@ public class StudentServiceTest {
 
     @BeforeEach
     void setUp() {
+
         Faculty faculty1 = new Faculty(1L, "Химия", "Красный");
         Faculty faculty2 = new Faculty(2L, "Физика", "Синий");
         facultyTest = new ArrayList<>(List.of(faculty1,
@@ -50,12 +52,13 @@ public class StudentServiceTest {
         Student student4 = new Student(4L, "Софья", "Афонина", 18, faculty1, StudentStatus.ACTIVE);
         Student student5 = new Student(5L, "Михаил", "Бачурин", 19, null, StudentStatus.ACTIVE);
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4, student5));
+        AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", student1.getId());
 // 1. Создаем StudentDTO (то, что маппер отдаст в конце)
-        StudentDTO sDto1 = new StudentDTO(1L, 23, "Артём", "Смирнов", "Химия", null, null, StudentStatus.ACTIVE, "79536160678", "123-456");
-        StudentDTO sDto2 = new StudentDTO(2L, 20, "Мария", "Леонова", "Химия", null, null, StudentStatus.ACTIVE, "79536160679", "123-457");
-        StudentDTO sDto3 = new StudentDTO(3L, 18, "Марат", "Измалков", "Химия", null, null, StudentStatus.ACTIVE, "79536160680", "123-458");
-        StudentDTO sDto4 = new StudentDTO(4L, 18, "Софья", "Афонина", "Химия", null, null, StudentStatus.ACTIVE, "79536160681", "123-459");
-        StudentDTO sDto5 = new StudentDTO(5L, 19, "Михаил", "Бачурин", null, null, null, StudentStatus.ACTIVE, "79536160682", "123-460");
+        StudentDTO sDto1 = new StudentDTO(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456");
+        StudentDTO sDto2 = new StudentDTO(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457");
+        StudentDTO sDto3 = new StudentDTO(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458");
+        StudentDTO sDto4 = new StudentDTO(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459");
+        StudentDTO sDto5 = new StudentDTO(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460");
 
         studentDtosTest = new ArrayList<>(List.of(sDto1, sDto2, sDto3, sDto4, sDto5));
 
@@ -115,7 +118,7 @@ public class StudentServiceTest {
         CreateStudentDto dto = createDtosTest.get(0);
         when(facultyRepository.findById(dto.getIdFaculty())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () ->
-                studentService.resolveFacultyOrThrow(dto.getIdFaculty()));
+                studentService.getFacultyOrThrow(dto.getIdFaculty()));
         verify(studentRepository, never()).save(any());
     }
 
@@ -124,7 +127,7 @@ public class StudentServiceTest {
         Long id = 10L;
         when(facultyRepository.findById(id)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () ->
-                studentService.resolveFacultyOrThrow(id));
+                studentService.getFacultyOrThrow(id));
     }
 
     @DisplayName("Поиск студента успешны")

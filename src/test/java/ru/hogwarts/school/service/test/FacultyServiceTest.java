@@ -10,6 +10,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.hogwarts.school.constant.StudentStatus;
+import ru.hogwarts.school.dto.avatar.AvatarDto;
+import ru.hogwarts.school.dto.faculty.CreateFacultyDto;
+import ru.hogwarts.school.dto.faculty.FacultyDto;
+import ru.hogwarts.school.dto.student.CreateStudentDto;
+import ru.hogwarts.school.dto.student.StudentDto;
 import ru.hogwarts.school.exception.NotFoundException;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -17,6 +22,7 @@ import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 import ru.hogwarts.school.service.FacultyService;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +36,11 @@ import static org.mockito.Mockito.*;
 public class FacultyServiceTest {
 
     private List<Student> studentsTest;
+    private List<StudentDto> studentDtosTest;
     private List<Faculty> facultyTest;
+    private List<FacultyDto> facultyDtoList;
+    private List<CreateFacultyDto> createFacultyDtoList;
+
 
     @BeforeEach
     void setUp() {
@@ -41,6 +51,20 @@ public class FacultyServiceTest {
 
         facultyTest = new ArrayList<>(List.of(faculty1, faculty2, faculty3, faculty4));
 
+        List<FacultyDto> facultyDtoList = List.of(
+                new FacultyDto(1L, "Химия", "Красный", new BigDecimal("1000.00")),
+                new FacultyDto(2L, "Физика", "Синий", new BigDecimal("2500.50")),
+                new FacultyDto(3L, "Биология", "Зеленый", new BigDecimal("0.00")),
+                new FacultyDto(4L, "Математика", "Белый", new BigDecimal("50000.00"))
+        );
+
+        List<CreateFacultyDto> createFacultyDtoList = List.of(
+                new CreateFacultyDto("Химия", "Красный"),
+                new CreateFacultyDto("Физика", "Синий"),
+                new CreateFacultyDto("Биология", "Зеленый"),
+                new CreateFacultyDto("Математика", "Белый")
+        );
+
         Student student1 = new Student(1L, "Артём", "Смирнов", 23, faculty1, StudentStatus.ACTIVE);
         Student student2 = new Student(2L, "Мария","Леонова", 20, faculty1, StudentStatus.ACTIVE);
         Student student3 = new Student(3L, "Марат", "Измалков",18, faculty1, StudentStatus.ACTIVE);
@@ -48,6 +72,16 @@ public class FacultyServiceTest {
         Student student5 = new Student(5L, "Михаил", "Бачурин", 19, null, StudentStatus.ACTIVE);
 
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4, student5));
+
+        AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", student1.getId());
+
+        StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456");
+        StudentDto sDto2 = new StudentDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457");
+        StudentDto sDto3 = new StudentDto(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458");
+        StudentDto sDto4 = new StudentDto(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459");
+        StudentDto sDto5 = new StudentDto(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460");
+
+        studentDtosTest = new ArrayList<>(List.of(sDto1, sDto2, sDto3, sDto4, sDto5));
     }
 
     @Mock
@@ -56,20 +90,26 @@ public class FacultyServiceTest {
     @Mock
     private FacultyRepository facultyRepository;
 
+    @Mock
+    private FacultyDto facultyDto;
+
+    @Mock
+    private CreateFacultyDto createFacultyDto;
+
     @InjectMocks
     private FacultyService facultyService;
 
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 2, 3})
     void createFaculty(int ints) {
-        Faculty test = facultyTest.get(ints);
+        CreateFacultyDto test = createFacultyDtoList.get(ints);
 
         when(facultyRepository.save(any(Faculty.class))).thenAnswer(i -> i.getArgument(0));
-        Faculty result = facultyService.createFaculty(test);
+        FacultyDto result = facultyService.createFaculty(test);
 
         assertNotNull(result);
-        assertEquals(test.getId(), result.getId());
-        assertEquals(test.getName(), result.getName());
+        assertEquals(test.color(), result.color());
+        assertEquals(test.name(), result.name());
     }
 
 
@@ -175,14 +215,14 @@ public class FacultyServiceTest {
     })
     void findByNameOrColorTest(String name, String color) {
         // 1. Подготовка: создаем список, который "якобы" нашла база
-        List<Faculty> expectedFaculties = facultyTest.stream()
-                .filter(f -> f.getName().equals(name) || f.getColor().equals(color))
+        List<FacultyDto> expectedFaculties = facultyDtoList.stream()
+                .filter(f -> f.name().equals(name) || f.color().equals(color))
                 .toList();
 
         when(facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color))
                 .thenReturn(expectedFaculties);
 
-        List<Faculty> result = facultyService.findByNameOrColor(name, color);
+        List<FacultyDto> result = facultyService.findByNameOrColor(name, color);
 
         assertNotNull(result);
         assertEquals(expectedFaculties.size(), result.size());
@@ -194,16 +234,16 @@ public class FacultyServiceTest {
     @ParameterizedTest
     @ValueSource (longs = {1L, 2L, 3L})
     void studentSearchIdFaculty (Long facultyId) {
-        List <Student> expectedStudent = studentsTest.stream()
-                .filter(s -> s.getFaculty() != null && s.getFaculty().getId().equals(facultyId))
+        List <StudentDto> expectedStudent = studentDtosTest.stream()
+                .filter(s -> s.getFaculty().equals(facultyId))
                 .toList();
         when(studentRepository.findByFaculty_Id(facultyId)).thenReturn(expectedStudent);
 
-        List<Student> result = facultyService.studentsFacultyById(facultyId);
+        List<StudentDto> result = facultyService.studentsFacultyById(facultyId);
 
         assertNotNull(result);
         assertEquals(expectedStudent.size(), result.size());
-        assertTrue(result.stream().allMatch(s -> s.getFaculty() != null && s.getFaculty().getId().equals(facultyId)));
+        assertTrue(result.stream().allMatch(s -> s.getFaculty().equals(facultyId)));
         verify(studentRepository, times(1)).findByFaculty_Id(facultyId);
     }
 

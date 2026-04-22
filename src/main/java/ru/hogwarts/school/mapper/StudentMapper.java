@@ -1,7 +1,5 @@
 package ru.hogwarts.school.mapper;
 
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -9,10 +7,8 @@ import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.PatchStudentDto;
-import ru.hogwarts.school.dto.student.StudentDTO;
-import ru.hogwarts.school.dto.task.TaskPatchDto;
+import ru.hogwarts.school.dto.student.StudentDto;
 import ru.hogwarts.school.model.Student;
-import ru.hogwarts.school.model.Task;
 import ru.hogwarts.school.service.DataCodecService;
 
 import java.util.List;
@@ -30,16 +26,16 @@ public abstract class StudentMapper {
     @Mapping(source = "avatar", target = "avatar")
     @Mapping(source = "studentTicket", target = "numberTicket")
     @Mapping(target = "numberPhone", ignore = true)
-    public abstract StudentDTO toDto(Student entity);
+    public abstract StudentDto toDto(Student entity);
 
     @AfterMapping
-    protected void decodePhoneNumber(Student entity, @MappingTarget StudentDTO dto) {
+    protected void decodePhoneNumber(Student entity, @MappingTarget StudentDto dto) {
         if (entity.getPhoneNumber() != null) {
             dto.setPhoneNumber(dataCodecService.decode(entity.getPhoneNumber()));
         }
     }
     @AfterMapping
-    protected void fillStudentId(@MappingTarget StudentDTO dto, Student entity) {
+    protected void fillStudentId(@MappingTarget StudentDto dto, Student entity) {
         if (dto.getAvatarDto() != null && entity.getId() != null) {
             dto.getAvatarDto().setStudentId(entity.getId());
         }
@@ -52,5 +48,5 @@ public abstract class StudentMapper {
 
     public abstract Student updateEntityFromPatchDto(PatchStudentDto dto, @MappingTarget Student entity);
 
-    public abstract List<StudentDTO> toDtoList(List<Student> students);
+    public abstract List<StudentDto> toDtoList(List<Student> students);
 }

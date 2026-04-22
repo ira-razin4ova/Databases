@@ -2,23 +2,18 @@ package ru.hogwarts.school.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.hogwarts.school.dto.faculty.FacultyDto;
-import ru.hogwarts.school.dto.faculty.PatchFacultyDto;
-import ru.hogwarts.school.dto.product.ProductDTO;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.PatchStudentDto;
-import ru.hogwarts.school.dto.student.StudentDTO;
+import ru.hogwarts.school.dto.student.StudentDto;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.FacultyService;
-import ru.hogwarts.school.service.ProductService;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.List;
@@ -44,13 +39,13 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity <StudentDTO> createStudent(@RequestBody @Valid CreateStudentDto dto) {
+    public ResponseEntity <StudentDto> createStudent(@RequestBody @Valid CreateStudentDto dto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(studentService.createStudent(dto));
     }
     @PatchMapping("/{id}")
-    public ResponseEntity<StudentDTO> patchStudent(
+    public ResponseEntity<StudentDto> patchStudent(
             @PathVariable Long id,
             @Valid @RequestBody PatchStudentDto dto)
     {
@@ -71,13 +66,13 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity <List<StudentDTO>> getStudentsByAge(@RequestParam int age) {
+    public ResponseEntity <List<StudentDto>> getStudentsByAge(@RequestParam int age) {
         return ResponseEntity.ok(studentService.findByAge(age));
     }
 
     @GetMapping("/age")
-    public ResponseEntity <List<StudentDTO>> getFindByAgeBetween(@RequestParam int from,
-                                             @RequestParam int to) {
+    public ResponseEntity <List<StudentDto>> getFindByAgeBetween(@RequestParam int from,
+                                                                 @RequestParam int to) {
         return ResponseEntity.ok(studentService.findByAgeBetween(from, to));
     }
 
@@ -111,7 +106,7 @@ public class StudentController {
     }
 
     @GetMapping ("/limit")
-    public ResponseEntity  <List <StudentDTO>> getStudentLimit () {
+    public ResponseEntity  <List <StudentDto>> getStudentLimit () {
         return ResponseEntity.ok(studentService.getStudentLimitFiveSortedDesc());
     }
 }

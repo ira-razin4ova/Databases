@@ -66,7 +66,7 @@ public class EventService {
     }
 
     @Transactional
-    public EventDto patchEvent(Long id, EventPatchDto patchDto) {
+    public EventDto patchEvent(Long id, PatchEventDto patchDto) {
         Event event = getEventOrThrow(id);
 
         eventMapper.updateEntityFromDto(patchDto, event);

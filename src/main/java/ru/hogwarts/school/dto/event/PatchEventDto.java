@@ -10,7 +10,7 @@ import java.util.List;
  * DTO для частичного обновления ивента.
  * Если поле равно null, оно не будет обновлено в базе.
  */
-public record EventPatchDto(
+public record PatchEventDto(
         String title,
         LocalDateTime dareStart,
         LocalDateTime dareEnd,

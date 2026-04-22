@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.hogwarts.school.constant.StudentStatus;
 import ru.hogwarts.school.dto.avatar.AvatarDto;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
-import ru.hogwarts.school.dto.student.StudentDTO;
+import ru.hogwarts.school.dto.student.StudentDto;
 import ru.hogwarts.school.exception.NotFoundException;
 import ru.hogwarts.school.mapper.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class StudentServiceTest {
 
-    private List<StudentDTO> studentDtosTest;
+    private List<StudentDto> studentDtosTest;
     private List<Student> studentsTest;
     private List<CreateStudentDto> createDtosTest;
     private List<Faculty> facultyTest;
@@ -54,11 +54,11 @@ public class StudentServiceTest {
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4, student5));
         AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", student1.getId());
 // 1. Создаем StudentDTO (то, что маппер отдаст в конце)
-        StudentDTO sDto1 = new StudentDTO(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456");
-        StudentDTO sDto2 = new StudentDTO(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457");
-        StudentDTO sDto3 = new StudentDTO(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458");
-        StudentDTO sDto4 = new StudentDTO(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459");
-        StudentDTO sDto5 = new StudentDTO(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460");
+        StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456");
+        StudentDto sDto2 = new StudentDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457");
+        StudentDto sDto3 = new StudentDto(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458");
+        StudentDto sDto4 = new StudentDto(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459");
+        StudentDto sDto5 = new StudentDto(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460");
 
         studentDtosTest = new ArrayList<>(List.of(sDto1, sDto2, sDto3, sDto4, sDto5));
 
@@ -96,7 +96,7 @@ public class StudentServiceTest {
         CreateStudentDto inputDto = createDtosTest.get(index);
         Student mappedEntity = studentsTest.get(index);
         Faculty faculty = mappedEntity.getFaculty();
-        StudentDTO expectedResult = studentDtosTest.get(index);
+        StudentDto expectedResult = studentDtosTest.get(index);
 
         when(studentMapper.toEntity(inputDto)).thenReturn(mappedEntity);
         when(dataCodecService.encodePhone(anyString())).thenReturn("ENCODED_123");
@@ -104,7 +104,7 @@ public class StudentServiceTest {
         // when(studentRepository.save(any(Student.class))).thenReturn(testStudent); // просто возвращает
         when(studentRepository.save(any(Student.class))).thenAnswer(i -> i.getArgument(0));// проверяем правильность создания перед отправкой в базу
         when(studentMapper.toDto(any(Student.class))).thenReturn(expectedResult);
-        StudentDTO result = studentService.createStudent(inputDto);
+        StudentDto result = studentService.createStudent(inputDto);
 
         assertNotNull(result);
         assertEquals(expectedResult.getFirstName(), result.getFirstName());
@@ -207,13 +207,13 @@ public class StudentServiceTest {
     void searchStudentByAge() {
         int age = 20;
 
-        List<Student> expectedStudent = studentsTest.stream()
+        List<StudentDto> expectedStudent = studentDtosTest.stream()
                 .filter(s -> s.getAge() == age)
                 .toList();
 
         when(studentRepository.findByAge(age)).thenReturn(expectedStudent);
 
-        List<Student> result = studentService.findByAge(age);
+        List<StudentDto> result = studentService.findByAge(age);
 
         assertEquals(expectedStudent.size(), result.size()); // сколько в тестовом списке и сколько в списке результата
         assertTrue(result.stream().allMatch(s -> s.getAge() == age)); // проверяем содержимое списка результата, с учетом фильтра возраста
@@ -224,13 +224,13 @@ public class StudentServiceTest {
     void searchStudentByAgeNull() {
         int age = 10;
 
-        List<Student> expectedStudent = studentsTest.stream()
+        List<StudentDto> expectedStudent = studentDtosTest.stream()
                 .filter(s -> s.getAge() == age)
                 .toList();
 
         when(studentRepository.findByAge(age)).thenReturn(expectedStudent);
 
-        List<Student> result = studentService.findByAge(age);
+        List<StudentDto> result = studentService.findByAge(age);
         assertEquals(expectedStudent.size(), result.size());
     }
 
@@ -239,13 +239,13 @@ public class StudentServiceTest {
         int from = 20;
         int to = 30;
 
-        List<Student> expectedStudent = studentsTest.stream()
+        List<StudentDto> expectedStudent = studentDtosTest.stream()
                 .filter(s -> s.getAge() >= from && s.getAge() <= to)
                 .toList();
 
         when(studentRepository.findByAgeBetween(from, to)).thenReturn(expectedStudent);
 
-        List<Student> result = studentService.findByAgeBetween(from, to);
+        List<StudentDto> result = studentService.findByAgeBetween(from, to);
 
         assertEquals(expectedStudent.size(), result.size());
         assertTrue(result.stream().allMatch(s -> s.getAge() >= from && s.getAge() <= to));

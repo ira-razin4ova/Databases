@@ -22,6 +22,6 @@ public interface EventMapper {
     List<EventShortDto> toDtoListShort(List<Event> eventsShort);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDto(EventPatchDto dto, @MappingTarget Event entity);
+    void updateEntityFromDto(PatchEventDto dto, @MappingTarget Event entity);
 
 }

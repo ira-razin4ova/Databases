@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.hogwarts.school.dto.faculty.CreateFacultyDto;
 import ru.hogwarts.school.dto.faculty.FacultyDto;
 import ru.hogwarts.school.dto.faculty.PatchFacultyDto;
-import ru.hogwarts.school.dto.student.StudentDTO;
+import ru.hogwarts.school.dto.student.StudentDto;
 import ru.hogwarts.school.exception.NotFoundException;
 import ru.hogwarts.school.mapper.FacultyMapper;
 import ru.hogwarts.school.model.Faculty;
@@ -31,7 +31,7 @@ public class FacultyService {
     @Transactional
     public FacultyDto createFaculty(CreateFacultyDto dto) {
         Faculty faculty = facultyMapper.toEntity(dto);
-
+        Faculty savedFaculty = facultyRepository.save(faculty);
         return facultyMapper.toDto(faculty);
     }
 
@@ -81,7 +81,7 @@ public class FacultyService {
         return facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color);
     }
 
-    public List<StudentDTO> studentsFacultyById(Long facultyId) {
+    public List<StudentDto> studentsFacultyById(Long facultyId) {
         return studentRepository.findByFaculty_Id(facultyId);
     }
 

@@ -9,15 +9,14 @@ import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.dto.faculty.CreateFacultyDto;
 import ru.hogwarts.school.dto.faculty.FacultyDto;
 import ru.hogwarts.school.dto.faculty.PatchFacultyDto;
-import ru.hogwarts.school.dto.student.StudentDTO;
+import ru.hogwarts.school.dto.student.StudentDto;
 import ru.hogwarts.school.model.Faculty;
-import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.FacultyService;
 
 import java.util.List;
 @Validated
 @RestController
-@RequestMapping("/faculty")
+@RequestMapping("/faculties")
 public class FacultyController {
 
     private final FacultyService facultyService;
@@ -72,7 +71,7 @@ public class FacultyController {
     }
 
     @GetMapping("{id}/faculty")
-    public List<StudentDTO> getFindStudentByIdFaculty(@PathVariable @Positive Long id) {
+    public List<StudentDto> getFindStudentByIdFaculty(@PathVariable @Positive Long id) {
         return facultyService.studentsFacultyById(id);
     }
 }

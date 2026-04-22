@@ -10,6 +10,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import ru.hogwarts.school.controller.FacultyController;
+import ru.hogwarts.school.dto.faculty.CreateFacultyDto;
+import ru.hogwarts.school.dto.faculty.FacultyDto;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.repository.FacultyRepository;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,14 +39,14 @@ public class FacultyControllerTestTRT {
 
     @Test
     void gatFaculty() {
-        assertThat(this.testRestTemplate.getForObject("http://localhost:" + port + "/faculty/2", String.class))
+        assertThat(this.testRestTemplate.getForObject("http://localhost:" + port + "/faculties/2", String.class))
                 .isNotEmpty();
     }
 
     @Test
     void gatFacultyNotValidId() {
         ResponseEntity<String> response = testRestTemplate.getForEntity(
-                "http://localhost:" + port + "/faculty/-10",
+                "http://localhost:" + port + "/faculties/-10",
                 String.class
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -53,13 +55,22 @@ public class FacultyControllerTestTRT {
 
     @Test
     void postFaculty() {
-        Faculty newFaculty = new Faculty(null, "TestName", "TestColor");
-        ResponseEntity<Faculty> response = testRestTemplate.postForEntity("http://localhost:" + port + "/faculty", newFaculty, Faculty.class);
-        Long id = response.getBody().getId();
-        assertThat(response.getBody().getId()).isNotNull();
-        assertEquals(response.getBody().getId(), id);
-        assertThat(facultyRepository.existsById(id)).isTrue();
+
+        CreateFacultyDto newFaculty = new CreateFacultyDto("TestName", "TestColor");
+
+        ResponseEntity<FacultyDto> response = testRestTemplate.postForEntity(
+                "http://localhost:" + port + "/faculties",
+                newFaculty,
+                FacultyDto.class
+        );
+
+        FacultyDto createdFaculty = response.getBody();
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(createdFaculty).isNotNull();
+        assertThat(createdFaculty.id()).isNotNull();
+
+        assertThat(facultyRepository.existsById(createdFaculty.id())).isTrue();
     }
 
     @Test
@@ -71,7 +82,7 @@ public class FacultyControllerTestTRT {
 
         HttpEntity<Faculty> entity = new HttpEntity<>(newFaculty);
         ResponseEntity<Faculty> response = testRestTemplate.exchange(
-                "http://localhost:" + port + "/faculty/" + id,
+                "http://localhost:" + port + "/faculties/" + id,
                 HttpMethod.PUT,
                 entity,
                 Faculty.class
@@ -86,7 +97,7 @@ public class FacultyControllerTestTRT {
         Long id = newFaculty.getId();
 
         ResponseEntity<String> response = testRestTemplate.exchange(
-                "http://localhost:" + port + "/faculty/" + id,
+                "http://localhost:" + port + "/faculties/" + id,
                 HttpMethod.DELETE,
                 null,
                 String.class

@@ -4,11 +4,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.hogwarts.school.constant.StudentStatus;
 import ru.hogwarts.school.dto.avatar.AvatarDto;
-import ru.hogwarts.school.model.Avatar;
 
 @Setter
 @NoArgsConstructor
-public class StudentDTO {
+public class StudentDto {
 
     private Long id;
     private int age;
@@ -20,7 +19,7 @@ public class StudentDTO {
     private String phoneNumber;
     private String numberTicket;
 
-    public StudentDTO(Long id, int age, String firstName, String lastName, String faculty, AvatarDto avatar, StudentStatus studentStatus, String numberPhone, String numberTicket) {
+    public StudentDto(Long id, int age, String firstName, String lastName, String faculty, AvatarDto avatar, StudentStatus studentStatus, String numberPhone, String numberTicket) {
         this.id = id;
         this.age = age;
         this.firstName = firstName;

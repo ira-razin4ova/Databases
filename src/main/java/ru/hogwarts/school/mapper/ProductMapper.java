@@ -2,9 +2,8 @@ package ru.hogwarts.school.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.hogwarts.school.dto.product.ProductDTO;
-import ru.hogwarts.school.dto.size.ProductSizeDTO;
 import ru.hogwarts.school.model.Product;
-import ru.hogwarts.school.model.ProductSize;
+
 @Component
 public class ProductMapper {
     public ProductDTO toDto(Product product) {
@@ -34,13 +33,13 @@ public class ProductMapper {
         return dto;
     }
 
-    private ProductSizeDTO toSizeDto(ProductSize size) {
-        if (size == null) return null;
-        ProductSizeDTO sizeDto = new ProductSizeDTO();
-        sizeDto.setId(size.getId());
-        sizeDto.setSize(size.getSizeType());
-        sizeDto.setQuantity(size.getQuantity());
-        sizeDto.setSortOrder(size.getSortOrder());
-        return sizeDto;
-    }
+//    private ProductSizeDTO toSizeDto(ProductSize size) {
+//        if (size == null) return null;
+//        ProductSizeDTO sizeDto = new ProductSizeDTO();
+//        sizeDto.setId(size.getId());
+//        sizeDto.setSize(size.getSizeType());
+//        sizeDto.setQuantity(size.getQuantity());
+//        sizeDto.setSortOrder(size.getSortOrder());
+//        return sizeDto;
+//    }
 }

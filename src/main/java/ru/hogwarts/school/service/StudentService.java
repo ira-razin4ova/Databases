@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.PatchStudentDto;
-import ru.hogwarts.school.dto.student.StudentDTO;
+import ru.hogwarts.school.dto.student.StudentDto;
 import ru.hogwarts.school.exception.NotFoundException;
 import ru.hogwarts.school.mapper.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
@@ -39,7 +39,7 @@ public class StudentService {
     }
 
     @Transactional
-    public StudentDTO createStudent(CreateStudentDto dto) {
+    public StudentDto createStudent(CreateStudentDto dto) {
         Student student = studentMapper.toEntity(dto);
         student.setPhoneNumber(dataCodecService.encodePhone(dto.getPhoneNumber()));
         student.setFaculty(getFacultyOrThrow(dto.getIdFaculty()));
@@ -62,14 +62,14 @@ public class StudentService {
                 ));
     }
 
-    public StudentDTO getByIdDTO(Long id) {
+    public StudentDto getByIdDTO(Long id) {
         Student student = getStudentOrThrow(id);
 
         return studentMapper.toDto(student);
     }
 
     @Transactional
-    public StudentDTO patchStudent(Long id, PatchStudentDto dto) {
+    public StudentDto patchStudent(Long id, PatchStudentDto dto) {
         Student student = getStudentOrThrow(id);
 
         studentMapper.updateEntityFromPatchDto(dto, student);
@@ -91,17 +91,17 @@ public class StudentService {
         student.setId(student.getId());
         return studentRepository.save(student);
     }
-
+    @Transactional
     public void deleteStudent(Long id) {
         Student studentToDelete = getStudentOrThrow(id);
         studentRepository.delete(studentToDelete);
     }
 
-    public List<StudentDTO> findByAge(int age) {
+    public List<StudentDto> findByAge(int age) {
         return studentRepository.findByAge(age);
     }
 
-    public List<StudentDTO> findByAgeBetween(int from, int to) {
+    public List<StudentDto> findByAgeBetween(int from, int to) {
         return studentRepository.findByAgeBetween(from, to);
     }
 
@@ -153,7 +153,7 @@ public class StudentService {
         return (avg != null) ? avg : 0.0;
     }
 
-    public List<StudentDTO> getStudentLimitFiveSortedDesc() {
+    public List<StudentDto> getStudentLimitFiveSortedDesc() {
         List<Student> students = studentRepository.getStudentLimitFive();
         return studentMapper.toDtoList(students);
     }

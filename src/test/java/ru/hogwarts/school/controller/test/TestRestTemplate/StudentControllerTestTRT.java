@@ -8,7 +8,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import ru.hogwarts.school.controller.StudentController;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
-import ru.hogwarts.school.dto.student.StudentDTO;
+import ru.hogwarts.school.dto.student.StudentDto;
 import ru.hogwarts.school.mapper.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -65,7 +65,7 @@ public class StudentControllerTestTRT {
     void postStudent1() {
         CreateStudentDto cDto1 = new CreateStudentDto(23, 1L, "Артём", "Смирнов", "79536160678", StudentStatus.ACTIVE, "123-456");
 
-        ResponseEntity<StudentDTO> response = testRestTemplate.postForEntity("http://localhost:" + port + "/students", cDto1, StudentDTO.class);
+        ResponseEntity<StudentDto> response = testRestTemplate.postForEntity("http://localhost:" + port + "/students", cDto1, StudentDto.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getId()).isNotNull();
@@ -75,10 +75,10 @@ public class StudentControllerTestTRT {
     void postStudent() {
     CreateStudentDto cDto1 = new CreateStudentDto(23, 1L, "Артём", "Смирнов", "79536160678", StudentStatus.ACTIVE, "123-456");
     HttpEntity<CreateStudentDto> entity = new HttpEntity<>(cDto1);
-    ResponseEntity<StudentDTO> response = testRestTemplate.exchange("http://localhost:" + port + "/students",
+    ResponseEntity<StudentDto> response = testRestTemplate.exchange("http://localhost:" + port + "/students",
             HttpMethod.POST,
             entity,
-            StudentDTO.class);
+            StudentDto.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getId()).isNotNull();
@@ -106,13 +106,14 @@ public class StudentControllerTestTRT {
         Faculty testNewFaculty = facultyRepository.save(new Faculty(null, "test", "test"));
         Student newStudent = studentRepository.save(new Student(null, "Sergei", "Leonov",20, testNewFaculty, StudentStatus.ACTIVE));
         Long id = newStudent.getId();
+        System.out.println("student id" + id);
 
-        ResponseEntity<Student> response = testRestTemplate.exchange("http://localhost:" + port + "/students/" + id,
+        ResponseEntity<String> response = testRestTemplate.exchange("http://localhost:" + port + "/students/" + id,
                 HttpMethod.DELETE,
                 null,
-                Student.class);
+                String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(studentRepository.existsById(id)).isFalse();
+        assertThat(studentRepository.findById(id)).isEmpty();
     }
 
     @Test

@@ -11,13 +11,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.hogwarts.school.controller.StudentController;
 import ru.hogwarts.school.dto.avatar.AvatarDto;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
-import ru.hogwarts.school.dto.student.StudentDTO;
+import ru.hogwarts.school.dto.student.StudentDto;
 import ru.hogwarts.school.mapper.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.constant.StudentStatus;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.service.DataCodecService;
+import ru.hogwarts.school.service.FacultyService;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.ArrayList;
@@ -25,10 +26,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(StudentController.class)
@@ -52,7 +53,11 @@ public class StudentControllerTestWMT {
     @MockitoBean
     private StudentMapper studentMapper;
 
+    @MockitoBean
+    private FacultyService facultyService;
+
     private List<Student> studentsTest;
+    private List<StudentDto> studentDtosTest;
     private List<Faculty> facultyTest;
 
     @BeforeEach
@@ -67,6 +72,16 @@ public class StudentControllerTestWMT {
         Student student3 = new Student(3L, "Марат", "Афонин", 18, faculty1, StudentStatus.ACTIVE);
         Student student4 = new Student(4L, "Михаил", "Башаров", 19, null, StudentStatus.ACTIVE);
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4));
+
+        AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", student1.getId());
+
+        StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456");
+        StudentDto sDto2 = new StudentDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457");
+        StudentDto sDto3 = new StudentDto(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458");
+        StudentDto sDto4 = new StudentDto(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459");
+        StudentDto sDto5 = new StudentDto(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460");
+
+        studentDtosTest = new ArrayList<>(List.of(sDto1, sDto2, sDto3, sDto4, sDto5));
     }
 
     @Test
@@ -87,7 +102,7 @@ public class StudentControllerTestWMT {
 
         CreateStudentDto cDto1 = new CreateStudentDto(23, 1L, "Артём", "Смирнов", "79536160678", StudentStatus.ACTIVE, "123-456");
         AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", 1L);
-        StudentDTO sDto1 = new StudentDTO(1L, 23, "Артём", "Смирнов", "Химия",avatarDto , StudentStatus.ACTIVE, "79536160678", "123-456");
+        StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия",avatarDto , StudentStatus.ACTIVE, "79536160678", "123-456");
 
         when(studentService.createStudent(any(CreateStudentDto.class))).thenReturn(sDto1);
 
@@ -119,11 +134,12 @@ public class StudentControllerTestWMT {
 
         Student testStudent = studentsTest.get(0);
 
-        when(studentService.deleteStudent(testStudent.getId())).thenReturn(testStudent);
+        doNothing().when(studentService).deleteStudent(testStudent.getId());
 
         mockMvc.perform(delete("/students/" + testStudent.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName").value(testStudent.getFirstName()));
+                .andExpect(status().isOk());
+
+        verify(studentService, times(1)).deleteStudent(testStudent.getId());
     }
 
     @Test
@@ -137,7 +153,7 @@ public class StudentControllerTestWMT {
 
         int age = 20;
 
-        List<Student> expectedStudent = studentsTest.stream()
+        List<StudentDto> expectedStudent = studentDtosTest.stream()
                 .filter(student -> student.getAge() >= age)
                 .collect(Collectors.toUnmodifiableList());
 
@@ -155,7 +171,7 @@ public class StudentControllerTestWMT {
         int fromAge = 18;
         int toAge = 20;
 
-        List<Student> expectedStudent = studentsTest.stream()
+        List<StudentDto> expectedStudent = studentDtosTest.stream()
                 .filter(student -> student.getAge() >= fromAge && student.getAge() <= toAge)
                 .collect(Collectors.toUnmodifiableList());
 

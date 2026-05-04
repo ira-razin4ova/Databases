@@ -10,3 +10,4 @@ CREATE INDEX IF NOT EXISTS idx_student_student_tiсket ON student (student_tiсk
 --changeset razinkova:3
 create index idx_faculty_name on faculty (name);
 create index idx_faculty_color on faculty (color);
+

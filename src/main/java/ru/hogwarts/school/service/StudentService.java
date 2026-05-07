@@ -1,6 +1,7 @@
 package ru.hogwarts.school.service;
 
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
@@ -19,7 +20,6 @@ import java.util.stream.Collectors;
 
 @Transactional(readOnly = true)
 @Service
-// @RequiredArgsConstructor Lombok Автоматически создаст конструктор для всех final полей
 public class StudentService {
 
     private final StudentRepository studentRepository;
@@ -27,19 +27,18 @@ public class StudentService {
     private final DataCodecService dataCodecService;
     private final StudentMapper studentMapper;
 
-    private final RestTemplateBuilder restTemplateBuilder;
-
-    public StudentService(StudentRepository studentRepository, FacultyRepository facultyRepository, DataCodecService dataCodecService, StudentMapper studentMapper,
-                          RestTemplateBuilder restTemplateBuilder) {
+    public StudentService(StudentRepository studentRepository, FacultyRepository facultyRepository, DataCodecService dataCodecService, StudentMapper studentMapper) {
         this.studentRepository = studentRepository;
         this.facultyRepository = facultyRepository;
         this.dataCodecService = dataCodecService;
         this.studentMapper = studentMapper;
-        this.restTemplateBuilder = restTemplateBuilder;
     }
+
+    Logger logger = LoggerFactory.getLogger(StudentService.class);
 
     @Transactional
     public StudentDto createStudent(CreateStudentDto dto) {
+        logger.info("Was invoked method for create Student CreateStudentDto = {}", dto);
         Student student = studentMapper.toEntity(dto);
         student.setPhoneNumber(dataCodecService.encodePhone(dto.getPhoneNumber()));
         student.setFaculty(getFacultyOrThrow(dto.getIdFaculty()));
@@ -48,32 +47,36 @@ public class StudentService {
     }
 
     public Faculty getFacultyOrThrow(Long id) {
+        logger.debug("Was invoked method for find Faculty");
         return facultyRepository.findById(id)
-                .orElseThrow(() ->
-                        new NotFoundException(
-                                "Факультет с id " + id + " не найден")
-                );
+                .orElseThrow(() -> {
+                   logger.warn("There is not faculty with id = {}", id);
+                   return new NotFoundException("Факультет с id " + id + " не найден");
+                });
     }
 
     public Student getStudentOrThrow(Long id) {
+        logger.debug("Was invoked method for find Student with id = {} ", id);
         return studentRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        "Пользователь с таким" + id + "не найден"
-                ));
+                .orElseThrow(() -> {
+                   logger.warn("There is not student with id = {}", id);
+                    return new NotFoundException("Пользователь с таким id " + id + " не найден");
+                });
     }
 
     public StudentDto getByIdDTO(Long id) {
         Student student = getStudentOrThrow(id);
-
         return studentMapper.toDto(student);
     }
 
     @Transactional
     public StudentDto patchStudent(Long id, PatchStudentDto dto) {
+        logger.info("Was invoked method for update Student id = {}, PatchStudentDto = {}", id, dto);
         Student student = getStudentOrThrow(id);
 
         studentMapper.updateEntityFromPatchDto(dto, student);
         updateFacultyRelationship(student, dto.facultyId());
+        logger.info("Student with id {} successfully updated and saved", id);
         return studentMapper.toDto(student);
     }
 
@@ -94,21 +97,28 @@ public class StudentService {
     @Transactional
     public void deleteStudent(Long id) {
         Student studentToDelete = getStudentOrThrow(id);
+        logger.info("Was invoked method delete student with id = {}, student = {}", id, studentToDelete);
         studentRepository.delete(studentToDelete);
     }
 
     public List<StudentDto> findByAge(int age) {
-        return studentRepository.findByAge(age);
+        logger.info("Was invoked method find by age = {} ", age);
+        List <Student> students = studentRepository.findByAge(age);
+        return studentMapper.toDtoList(students);
     }
 
     public List<StudentDto> findByAgeBetween(int from, int to) {
-        return studentRepository.findByAgeBetween(from, to);
+        logger.info("Was invoked method find by age between from = {} - to = {} ", from, to);
+        List <Student> students = studentRepository.findByAgeBetween(from, to);
+        return studentMapper.toDtoList(students);
     }
 
     public Faculty getFacultyByStudentId(Long studentId) {
         Student student = getStudentOrThrow(studentId);
+        logger.info("Was invoked method det faculty student id = {} ", studentId);
 
         if (student.getFaculty() == null) {
+            logger.warn("student faculty null id = {}", studentId);
             throw new NotFoundException("Уточните информацию данный факультет отсутствует или указан неверно!");
         }
         return student.getFaculty();

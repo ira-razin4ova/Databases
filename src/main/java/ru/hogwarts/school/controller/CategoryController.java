@@ -7,12 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.dto.category.CategoryDto;
-import ru.hogwarts.school.model.Category;
 import ru.hogwarts.school.service.CategoryService;
 
 @Validated
 @RestController
-@RequestMapping("/categories")
+@RequestMapping("/api/v1/categories")
 
 public class CategoryController {
 

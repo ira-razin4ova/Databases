@@ -75,11 +75,11 @@ public class FacultyServiceTest {
 
         AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", student1.getId());
 
-        StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456");
-        StudentDto sDto2 = new StudentDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457");
-        StudentDto sDto3 = new StudentDto(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458");
-        StudentDto sDto4 = new StudentDto(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459");
-        StudentDto sDto5 = new StudentDto(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460");
+        StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456",1);
+        StudentDto sDto2 = new StudentDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457",1);
+        StudentDto sDto3 = new StudentDto(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458",1);
+        StudentDto sDto4 = new StudentDto(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459",1);
+        StudentDto sDto5 = new StudentDto(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460",1);
 
         studentDtosTest = new ArrayList<>(List.of(sDto1, sDto2, sDto3, sDto4, sDto5));
     }
@@ -190,11 +190,11 @@ public class FacultyServiceTest {
         Faculty testFaculty = facultyTest.get(ints);
         Long id = testFaculty.getId();
 
-        when(facultyRepository.existsById(id)).thenReturn(true);
+        when(facultyRepository.findById(id)).thenReturn(Optional.of(testFaculty));
 
         facultyService.deleteFaculty(id);
 
-        verify(facultyRepository, times(1)).deleteById(id);
+        verify(facultyRepository, times(1)).delete(testFaculty);
     }
 
     @ParameterizedTest
@@ -203,7 +203,7 @@ public class FacultyServiceTest {
         Faculty testFaculty = facultyTest.get(ints);
         Long id = testFaculty.getId();
 
-        when(facultyRepository.existsById(id)).thenReturn(false);
+        when(facultyRepository.findById(id)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () ->
                 facultyService.deleteFaculty(id));
     }
@@ -234,7 +234,7 @@ public class FacultyServiceTest {
     @ParameterizedTest
     @ValueSource (longs = {1L, 2L, 3L})
     void studentSearchIdFaculty (Long facultyId) {
-        List <StudentDto> expectedStudent = studentDtosTest.stream()
+        List <Student> expectedStudent = studentsTest.stream()
                 .filter(s -> s.getFaculty().equals(facultyId))
                 .toList();
         when(studentRepository.findByFaculty_Id(facultyId)).thenReturn(expectedStudent);

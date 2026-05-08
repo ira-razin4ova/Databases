@@ -18,15 +18,28 @@ public class CreateStudentDto {
                             Long idFaculty,
                             String firstName,
                             String lastName,
-                            String phonNumber,
+                            String phoneNumber,
                             StudentStatus studentStatus,
                             String studentTicket) {
         this.age = age;
         this.idFaculty = idFaculty;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.phoneNumber = phonNumber;
+        this.phoneNumber = phoneNumber;
         this.studentStatus = studentStatus;
         this.studentTicket = studentTicket;
+    }
+
+    @Override
+    public String toString() {
+        return "CreateStudentDto{" +
+                "age=" + age +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", idFaculty=" + idFaculty +
+                ", studentStatus=" + studentStatus +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", studentTicket='" + studentTicket + '\'' +
+                '}';
     }
 }

@@ -1,4 +1,4 @@
-package ru.hogwarts.school.dto.event;
+package ru.hogwarts.school.dto.quest;
 
 
 import ru.hogwarts.school.dto.task.CreateTaskDto;
@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 import java.util.List;
 
-public record CreateEventDto(
+public record CreateQuestDto(
 
         String title,
         String description,

@@ -1,6 +1,6 @@
-package ru.hogwarts.school.dto.event;
+package ru.hogwarts.school.dto.quest;
 
-public record EventShortDto(
+public record QuestShortDto(
         Long id,
         String title,
         String description,

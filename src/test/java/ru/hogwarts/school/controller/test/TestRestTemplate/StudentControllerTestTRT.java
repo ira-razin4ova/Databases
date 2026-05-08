@@ -85,7 +85,7 @@ public class StudentControllerTestTRT {
 }
     @Test
     void putStudent() {
-        Faculty testNewFaculty = facultyRepository.save(new Faculty(null, "test", "test"));
+        Faculty testNewFaculty = facultyRepository.save(new Faculty(null, "test1", "test1"));
         Student newStudent = studentRepository.save(new Student(null, "Sergei","Leonov", 20, testNewFaculty, StudentStatus.ACTIVE));
         newStudent.setFirstName("setName");
         newStudent.setAge(21);

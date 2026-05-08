@@ -2,7 +2,7 @@ package ru.hogwarts.school.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import ru.hogwarts.school.constant.SizeType;
+import ru.hogwarts.school.constant.SizeProduct;
 
 import java.util.Objects;
 
@@ -15,7 +15,7 @@ public class ProductSize {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private SizeType sizeType;
+    private SizeProduct sizeProduct;
 
     @Column (name = "quantity")
     private Integer quantity;
@@ -26,11 +26,11 @@ public class ProductSize {
     @JsonBackReference
     private Product product;
 
-    public ProductSize(Long id, Product product, Integer quantity, SizeType sizeType, Integer sortOrder) {
+    public ProductSize(Long id, Product product, Integer quantity, SizeProduct sizeProduct, Integer sortOrder) {
         this.id = id;
         this.product = product;
         this.quantity = quantity;
-        this.sizeType = sizeType;
+        this.sizeProduct = sizeProduct;
     }
     public ProductSize() {
     }
@@ -47,8 +47,8 @@ public class ProductSize {
         this.quantity = quantity;
     }
 
-    public void setSizeType(SizeType sizeType) {
-        this.sizeType = sizeType;
+    public void setSizeType(SizeProduct sizeProduct) {
+        this.sizeProduct = sizeProduct;
     }
 
     public Long getId() {
@@ -63,11 +63,11 @@ public class ProductSize {
         return quantity;
     }
 
-    public SizeType getSizeType() {
-        return sizeType;
+    public SizeProduct getSizeType() {
+        return sizeProduct;
     }
     public int getSortOrder() {
-        return sizeType != null ? sizeType.getSortOrder() : 0;
+        return sizeProduct != null ? sizeProduct.getSortOrder() : 0;
     }
 
     @Override
@@ -87,7 +87,7 @@ public class ProductSize {
     public String toString() {
         return "ProductSize{" +
                 "id=" + id +
-                ", sizeType=" + sizeType +
+                ", sizeType=" + sizeProduct +
                 ", quantity=" + quantity +
                 ", product=" + product +
                 '}';

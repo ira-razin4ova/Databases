@@ -1,11 +1,11 @@
-package ru.hogwarts.school.dto.event;
+package ru.hogwarts.school.dto.quest;
 
 import ru.hogwarts.school.dto.task.TaskDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record EventFullDto(
+public record QuestFullDto(
         Long id,
         String title,
         LocalDateTime dateStart,

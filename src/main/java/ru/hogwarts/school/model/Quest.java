@@ -14,8 +14,8 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "event")
-public class Event {
+@Table(name = "quest")
+public class Quest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ public class Event {
     @Column(name = "archive")
     private Boolean archive;
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "quest", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Task> tasks = new ArrayList<>();
 
@@ -47,12 +47,12 @@ public class Event {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Event event = (Event) o;
-        return Objects.equals(getId(), event.getId()) &&
-                Objects.equals(getTitle(), event.getTitle()) &&
-                Objects.equals(getDateStart(), event.getDateStart()) &&
-                Objects.equals(getDateEnd(), event.getDateEnd()) &&
-                Objects.equals(getArchive(), event.getArchive());
+        Quest quest = (Quest) o;
+        return Objects.equals(getId(), quest.getId()) &&
+                Objects.equals(getTitle(), quest.getTitle()) &&
+                Objects.equals(getDateStart(), quest.getDateStart()) &&
+                Objects.equals(getDateEnd(), quest.getDateEnd()) &&
+                Objects.equals(getArchive(), quest.getArchive());
     }
 
     @Override

@@ -18,9 +18,9 @@ import ru.hogwarts.school.service.StudentService;
 
 import java.util.List;
 
-@Validated //Включает проверку всех аннотаций @Positive, @Min, @Max в этом классе
+@Validated
 @RestController
-@RequestMapping("/students")
+@RequestMapping("/api/v1/students")
 public class StudentController {
 
     private final StudentService studentService;
@@ -45,7 +45,7 @@ public class StudentController {
                 .body(studentService.createStudent(dto));
     }
     @PatchMapping("/{id}")
-    public ResponseEntity<StudentDto> patchStudent(
+    public ResponseEntity<StudentDto> updateStudent(
             @PathVariable Long id,
             @Valid @RequestBody PatchStudentDto dto)
     {
@@ -59,10 +59,10 @@ public class StudentController {
         return studentService.editStudent(student);
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<String> deleteStudent(@PathVariable @Positive Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteStudent(@PathVariable @Positive Long id) {
         studentService.deleteStudent(id);
-        return ResponseEntity.ok("Студент с id " + id + " успешно удалена");
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
@@ -90,9 +90,9 @@ public class StudentController {
         return ResponseEntity.ok().headers(headers).body(data);
     }
     @GetMapping("/dto/{id}")
-    public ResponseEntity<String> getStudentByIdDTO(@PathVariable Long id) {
-        studentService.getByIdDTO(id);
-        return ResponseEntity.ok("Студент с id " + id + " успешно удалена");
+    public ResponseEntity<StudentDto> getStudentByIdDTO(@PathVariable Long id) {
+
+        return ResponseEntity.ok( studentService.getByIdDTO(id));
     }
 
     @GetMapping ("/count")

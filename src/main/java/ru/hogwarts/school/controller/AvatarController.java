@@ -17,7 +17,7 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/avatars")
+@RequestMapping("/api/v1/avatars")
 public class AvatarController {
     private final AvatarService avatarService;
 

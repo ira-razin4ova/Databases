@@ -14,6 +14,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "faculty")
 public class Faculty {
     @Id
@@ -27,7 +28,7 @@ public class Faculty {
     private String color;
 
     @OneToMany(mappedBy = "faculty") // ленивый по умолчанию
-    @JsonIgnore
+    @JsonIgnoreProperties("faculty")
     private List<Student> students = new ArrayList<>();
 
     @Column(precision = 10, scale = 2)
@@ -61,10 +62,10 @@ public class Faculty {
     @Override
     public String toString() {
         return "Faculty{" +
-                "color='" + color + '\'' +
+                "balance=" + balance +
                 ", id=" + id +
                 ", name='" + name + '\'' +
+                ", color='" + color + '\'' +
                 '}';
     }
-
 }

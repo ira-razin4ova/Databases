@@ -1,9 +1,6 @@
 package ru.hogwarts.school.mapper;
 
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.PatchStudentDto;
@@ -25,7 +22,7 @@ public abstract class StudentMapper {
     @Mapping(source = "faculty.name", target = "faculty")
     @Mapping(source = "avatar", target = "avatar")
     @Mapping(source = "studentTicket", target = "numberTicket")
-    @Mapping(target = "numberPhone", ignore = true)
+    @Mapping(target = "phoneNumber", ignore = true)
     public abstract StudentDto toDto(Student entity);
 
     @AfterMapping
@@ -34,10 +31,11 @@ public abstract class StudentMapper {
             dto.setPhoneNumber(dataCodecService.decode(entity.getPhoneNumber()));
         }
     }
+
     @AfterMapping
     protected void fillStudentId(@MappingTarget StudentDto dto, Student entity) {
-        if (dto.getAvatarDto() != null && entity.getId() != null) {
-            dto.getAvatarDto().setStudentId(entity.getId());
+        if (dto.getAvatar() != null && entity.getId() != null) {
+            dto.getAvatar().setStudentId(entity.getId());
         }
     }
 
@@ -46,6 +44,7 @@ public abstract class StudentMapper {
     @Mapping(target = "avatar", ignore = true)
     public abstract Student toEntity(CreateStudentDto dto);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract Student updateEntityFromPatchDto(PatchStudentDto dto, @MappingTarget Student entity);
 
     public abstract List<StudentDto> toDtoList(List<Student> students);

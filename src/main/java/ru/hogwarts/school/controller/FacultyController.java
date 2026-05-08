@@ -16,7 +16,7 @@ import ru.hogwarts.school.service.FacultyService;
 import java.util.List;
 @Validated
 @RestController
-@RequestMapping("/faculties")
+@RequestMapping("/api/v1/faculties")
 public class FacultyController {
 
     private final FacultyService facultyService;
@@ -38,17 +38,16 @@ public class FacultyController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<FacultyDto> patchFaculty(
+    public ResponseEntity<FacultyDto> updateFaculty(
             @PathVariable Long id,
             @Valid @RequestBody PatchFacultyDto dto)
     {
-        return ResponseEntity.ok(facultyService.patchFaculty(id,dto));
+        return ResponseEntity.ok(facultyService.updateFaculty(id,dto));
     }
 
     @PutMapping("{id}")
     public Faculty editFaculty(@PathVariable @Positive Long id,
                                @RequestBody Faculty faculty) {
-        faculty.setId(id);
         return facultyService.editFaculty(faculty);
     }
 
@@ -56,12 +55,6 @@ public class FacultyController {
     public ResponseEntity<String> deleteFaculty(@PathVariable @Positive Long id) {
         facultyService.deleteFaculty(id);
         return ResponseEntity.ok("Факультет с ID " + id + " успешно удален");
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity <List<FacultyDto>>  findByFields(@RequestParam(required = false) String name,
-                                      @RequestParam(required = false) String color) {
-        return ResponseEntity.ok(facultyService.searchNameOrColor(name, color));
     }
 
     @GetMapping

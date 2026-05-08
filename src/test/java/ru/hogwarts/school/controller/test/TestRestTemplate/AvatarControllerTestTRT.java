@@ -67,7 +67,7 @@ private AvatarMapper avatarMapper;
         avatar.setFileSize(100L);
         avatar.setData(new byte[]{1, 2, 3});
         avatar.setPreview(new byte[]{1, 2, 3});
-        avatar.setFilePathPreview("test/path/" + student.getId() + "preview.png");;
+        avatar.setFilePathPreview("test/path/" + student.getId() + "preview.png");
         return avatarRepository.save(avatar);
     }
 

@@ -15,31 +15,7 @@ public class ProductMapper {
         dto.setName(product.getProductName());
         dto.setPrice(product.getPrice());
         dto.setMainPic(product.getMainPic());
-//        dto.setImages(product.getImages());
-//
-//        if (product.getFaculties() != null) {
-//            dto.setFacultyIds(product.getFaculties().stream()
-//                    .map(Faculty::getId)
-//                    .toList());
-//        }
-//
-//        // --- ДОБАВЛЯЕМ САЙЗЫ ---
-//        if (product.getSizes() != null) {
-//            dto.setSizes(product.getSizes().stream()
-//                    .map(this::toSizeDto) // Используем вспомогательный метод ниже
-//                    .toList());
-//        }
-
         return dto;
     }
 
-//    private ProductSizeDTO toSizeDto(ProductSize size) {
-//        if (size == null) return null;
-//        ProductSizeDTO sizeDto = new ProductSizeDTO();
-//        sizeDto.setId(size.getId());
-//        sizeDto.setSize(size.getSizeType());
-//        sizeDto.setQuantity(size.getQuantity());
-//        sizeDto.setSortOrder(size.getSortOrder());
-//        return sizeDto;
-//    }
 }

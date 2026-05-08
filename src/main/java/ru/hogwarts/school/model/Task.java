@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.Objects;
 
+
 @Entity
 @Getter
 @Setter
@@ -25,9 +26,9 @@ public class Task {
     private Integer award;
 
     @ManyToOne
-    @JoinColumn (name = "event_id")
+    @JoinColumn (name = "quest_id")
     @JsonBackReference
-    private Event event;
+    private Quest quest;
 
     @Column (name = "archive")
     private Boolean archive;
@@ -43,9 +44,8 @@ public class Task {
                 Objects.equals(getArchive(), task.getArchive());
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(getId(), getTitle(), getAward(), getArchive());
+        return java.util.Objects.hash(super.hashCode(), getId(), getTitle(), getAward(), getQuest(), getArchive());
     }
 
     @Override
@@ -55,7 +55,7 @@ public class Task {
                 ", id=" + id +
                 ", title='" + title + '\'' +
                 ", award=" + award +
-                ", event=" + event.getId() +
+                ", event=" + quest.getId() +
                 '}';
     }
 }

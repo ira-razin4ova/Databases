@@ -8,6 +8,5 @@ CREATE INDEX IF NOT EXISTS idx_student_phone_number ON student (phone_number);
 CREATE INDEX IF NOT EXISTS idx_student_student_tiсket ON student (student_tiсket);
 
 --changeset razinkova:3
-create index idx_faculty_name on faculty (name);
-create index idx_faculty_color on faculty (color);
-
+CREATE INDEX idx_faculty_name ON faculty (name);
+CREATE INDEX idx_faculty_color ON faculty (color);

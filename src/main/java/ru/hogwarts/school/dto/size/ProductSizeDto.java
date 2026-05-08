@@ -1,10 +1,10 @@
 package ru.hogwarts.school.dto.size;
 
-import ru.hogwarts.school.constant.SizeType;
+import ru.hogwarts.school.constant.SizeProduct;
 
 public record ProductSizeDto(
         Long id,
-        SizeType size,
+        SizeProduct size,
         Integer quantity,
         Integer sortOrder) {
 }

@@ -7,7 +7,10 @@ public record PatchStudentDto(
         String lastName,
         Integer age,
         Long facultyId,
-        StudentStatus studentStatus
+        StudentStatus studentStatus,
+        String phoneNumber,
+        Integer course,
+        String studentTicket
 )
 {
 }

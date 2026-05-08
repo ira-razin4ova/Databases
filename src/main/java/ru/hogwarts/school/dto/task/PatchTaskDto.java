@@ -1,9 +1,10 @@
 package ru.hogwarts.school.dto.task;
 
-public record TaskPatchDto(
+public record PatchTaskDto(
         Long id,
-        Long eventId,
         String title,
         String description,
-        Integer award) {
+        Integer award,
+        Long questId,
+        Boolean archive) {
 }

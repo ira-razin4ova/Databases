@@ -54,11 +54,11 @@ public class StudentServiceTest {
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4, student5));
         AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", student1.getId());
 // 1. Создаем StudentDTO (то, что маппер отдаст в конце)
-        StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456");
-        StudentDto sDto2 = new StudentDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457");
-        StudentDto sDto3 = new StudentDto(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458");
-        StudentDto sDto4 = new StudentDto(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459");
-        StudentDto sDto5 = new StudentDto(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460");
+        StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456",1);
+        StudentDto sDto2 = new StudentDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457",1);
+        StudentDto sDto3 = new StudentDto(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458",1);
+        StudentDto sDto4 = new StudentDto(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459",1);
+        StudentDto sDto5 = new StudentDto(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460",1);
 
         studentDtosTest = new ArrayList<>(List.of(sDto1, sDto2, sDto3, sDto4, sDto5));
 
@@ -207,7 +207,7 @@ public class StudentServiceTest {
     void searchStudentByAge() {
         int age = 20;
 
-        List<StudentDto> expectedStudent = studentDtosTest.stream()
+        List<Student> expectedStudent = studentsTest.stream()
                 .filter(s -> s.getAge() == age)
                 .toList();
 
@@ -224,7 +224,7 @@ public class StudentServiceTest {
     void searchStudentByAgeNull() {
         int age = 10;
 
-        List<StudentDto> expectedStudent = studentDtosTest.stream()
+        List<Student> expectedStudent = studentsTest.stream()
                 .filter(s -> s.getAge() == age)
                 .toList();
 
@@ -239,7 +239,7 @@ public class StudentServiceTest {
         int from = 20;
         int to = 30;
 
-        List<StudentDto> expectedStudent = studentDtosTest.stream()
+        List<Student> expectedStudent = studentsTest.stream()
                 .filter(s -> s.getAge() >= from && s.getAge() <= to)
                 .toList();
 

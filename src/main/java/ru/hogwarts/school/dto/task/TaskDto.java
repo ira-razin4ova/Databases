@@ -4,7 +4,6 @@ public record TaskDto (
          Long id,
          String title,
          Integer award,
-         Long eventId,
-         Boolean archive
-)
+         Boolean archive,
+         Long questId)
 { }

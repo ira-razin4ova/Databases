@@ -1,6 +1,6 @@
 package ru.hogwarts.school.constant;
 
-public enum SizeType {
+public enum SizeProduct {
     XS("XS", 1),
     S("S",2),
     M("M",3),
@@ -13,7 +13,7 @@ public enum SizeType {
 
     private final int sortOrder;
 
-    SizeType(String label, int sortOrder) {
+    SizeProduct(String label, int sortOrder) {
         this.label = label;
         this.sortOrder = sortOrder;
     }

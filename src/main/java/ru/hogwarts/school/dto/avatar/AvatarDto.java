@@ -1,10 +1,12 @@
 package ru.hogwarts.school.dto.avatar;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
+@Getter
 public class AvatarDto {
     private Long id;
     private String filePath;
@@ -16,21 +18,5 @@ public class AvatarDto {
         this.filePath = filePath;
         this.filePathPreview = filePathPreview;
         this.studentId = studentId;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public String getFilePathPreview() {
-        return filePathPreview;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getStudentId() {
-        return studentId;
     }
 }

@@ -1,8 +1,10 @@
 package ru.hogwarts.school.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Setter;
+import org.hibernate.sql.results.graph.Fetch;
 import ru.hogwarts.school.constant.StudentStatus;
 
 import java.math.BigDecimal;
@@ -10,6 +12,7 @@ import java.util.Objects;
 
 @Setter
 @Entity
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Table(name = "student")
 public class Student {
     @Id
@@ -25,12 +28,13 @@ public class Student {
     @Column(name = "age", nullable = false)
     private int age;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "faculty_id")
-    @JsonIgnoreProperties("student")
+    @JsonIgnoreProperties("students")
     private Faculty faculty;
 
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Avatar avatar;
 
     @Column(name = "student_status")
@@ -79,7 +83,15 @@ public class Student {
         return "Student{" +
                 "age=" + age +
                 ", id=" + id +
-                ", name='" + firstName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", faculty=" + faculty.getName() +
+                ", avatar=" + avatar +
+                ", studentStatus=" + studentStatus +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", course=" + course +
+                ", balance=" + balance +
+                ", studentTicket='" + studentTicket + '\'' +
                 '}';
     }
 

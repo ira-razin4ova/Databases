@@ -1,5 +1,6 @@
 package ru.hogwarts.school.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -14,10 +15,6 @@ public class Avatar {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     @Column(name = "file_path")
     private String filePath;
 
@@ -31,16 +28,19 @@ public class Avatar {
     private String mediaType;
 
     @Lob
+    @JsonIgnore
     @Column(name = "data", columnDefinition = "oid")
     private byte[] data;
 
     @Lob
+    @JsonIgnore
     @Column(name = "preview_avatar", columnDefinition = "oid")
     private byte[] preview;
 
     @OneToOne
     @JsonIgnoreProperties("student")
     @JoinColumn(name = "student_id")
+    @JsonBackReference
     private Student student;
 
     public Avatar(String filePath, String filePathPreview, long fileSize, String mediaType, byte[] data, byte[] preview, Student student) {
@@ -147,5 +147,9 @@ public class Avatar {
 
     public void setPreview(byte[] preview) {
         this.preview = preview;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

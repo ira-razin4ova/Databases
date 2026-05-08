@@ -1,11 +1,13 @@
 package ru.hogwarts.school.dto.student;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.hogwarts.school.constant.StudentStatus;
 import ru.hogwarts.school.dto.avatar.AvatarDto;
 
 @Setter
+@Getter
 @NoArgsConstructor
 public class StudentDto {
 
@@ -18,8 +20,11 @@ public class StudentDto {
     private StudentStatus studentStatus;
     private String phoneNumber;
     private String numberTicket;
+    private Integer course;
 
-    public StudentDto(Long id, int age, String firstName, String lastName, String faculty, AvatarDto avatar, StudentStatus studentStatus, String numberPhone, String numberTicket) {
+
+    public StudentDto(Long id, int age, String firstName, String lastName, String faculty, AvatarDto avatar, StudentStatus studentStatus, String numberPhone, String numberTicket,
+                      Integer course) {
         this.id = id;
         this.age = age;
         this.firstName = firstName;
@@ -29,42 +34,7 @@ public class StudentDto {
         this.studentStatus = studentStatus;
         this.phoneNumber = numberPhone;
         this.numberTicket = numberTicket;
+        this.course = course;
 
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public AvatarDto getAvatarDto() {
-        return avatar;
-    }
-
-    public String getFaculty() {
-        return faculty;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public StudentStatus getStudentStatus() {
-        return studentStatus;
-    }
-
-    public String getNumberPhone() {
-        return phoneNumber;
-    }
-
-    public String getNumberTicket() {
-        return numberTicket;
     }
 }

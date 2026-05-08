@@ -4,15 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hogwarts.school.dto.task.CreateTaskDto;
+import ru.hogwarts.school.dto.task.PatchTaskDto;
 import ru.hogwarts.school.dto.task.TaskDto;
-import ru.hogwarts.school.dto.task.TaskPatchDto;
 import ru.hogwarts.school.exception.BadRequestException;
 import ru.hogwarts.school.exception.NotFoundException;
 import ru.hogwarts.school.mapper.TaskMapper;
-import ru.hogwarts.school.model.Event;
+import ru.hogwarts.school.model.Quest;
 import ru.hogwarts.school.model.Task;
-import ru.hogwarts.school.repository.EventRepository;
+import ru.hogwarts.school.repository.QuestRepository;
 import ru.hogwarts.school.repository.TaskRepository;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,15 +23,25 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
 
-    private final EventRepository eventRepository;
+    private final QuestRepository questRepository;
 
     private final TaskMapper taskMapper;
 
     public Task getTaskOrThrow (Long id) {
         return taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task " + id + "not found"));
     }
-    public Event getEventOrThrow (Long id) {
-        return eventRepository.findById(id).orElseThrow(() -> new NotFoundException("Task " + id + "not found"));
+    public Quest getQuestOrThrow(Long id) {
+        return questRepository.findById(id).orElseThrow(() -> new NotFoundException("Task " + id + "not found"));
+    }
+
+    public List<TaskDto> getAllTasks () {
+        List <Task> tasks = taskRepository.findAll();
+        return taskMapper.toDtoList(tasks);
+    }
+
+    public TaskDto getTaskById (Long id) {
+        Task task = getTaskOrThrow(id);
+        return taskMapper.toDto(task);
     }
 
     @Transactional
@@ -40,26 +52,26 @@ public class TaskService {
     }
 
     private void linkTasksToEvent(Task task) {
-        if (task.getEvent() == null) {
+        if (task.getQuest() == null) {
             throw new BadRequestException("ID ивента не может быть пустым");
         }
-        Event event = getEventOrThrow(task.getEvent().getId());
-        task.setEvent(event);
+        Quest quest = getQuestOrThrow(task.getQuest().getId());
+        task.setQuest(quest);
     }
 
     @Transactional
-    public TaskDto patchTask (Long id, TaskPatchDto dto) {
+    public TaskDto patchTask (Long id, PatchTaskDto dto) {
         Task task = getTaskOrThrow(id);
 
         taskMapper.updateEntityFromPatchDto(dto, task);
-        updateEventRelationship(task, dto.eventId());
+        updateEventRelationship(task, dto.questId());
         return taskMapper.toDto(task);
     }
 
     private void updateEventRelationship(Task task, Long eventId) {
         if (eventId != null) {
-            Event newEvent = getEventOrThrow(eventId);
-            task.setEvent(newEvent);
+            Quest newQuest = getQuestOrThrow(eventId);
+            task.setQuest(newQuest);
         }
     }
 

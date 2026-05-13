@@ -4,10 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.hogwarts.school.constant.AppConstants;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.PatchStudentDto;
 import ru.hogwarts.school.dto.student.StudentDto;
-import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.exception.EntityNotFoundException;
+import ru.hogwarts.school.exception.ValidationException;
 import ru.hogwarts.school.mapper.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -17,6 +19,8 @@ import ru.hogwarts.school.repository.StudentRepository;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 @Transactional(readOnly = true)
 @Service
@@ -51,7 +55,7 @@ public class StudentService {
         return facultyRepository.findById(id)
                 .orElseThrow(() -> {
                    logger.warn("There is not faculty with id = {}", id);
-                   return new NotFoundException("Факультет с id " + id + " не найден");
+                   return new EntityNotFoundException("Факультет", id);
                 });
     }
 
@@ -60,7 +64,7 @@ public class StudentService {
         return studentRepository.findById(id)
                 .orElseThrow(() -> {
                    logger.warn("There is not student with id = {}", id);
-                    return new NotFoundException("Пользователь с таким id " + id + " не найден");
+                    return new EntityNotFoundException("Студент",  id);
                 });
     }
 
@@ -70,12 +74,20 @@ public class StudentService {
     }
 
     @Transactional
-    public StudentDto patchStudent(Long id, PatchStudentDto dto) {
+    public StudentDto updateStudent(Long id, PatchStudentDto dto) {
         logger.info("Was invoked method for update Student id = {}, PatchStudentDto = {}", id, dto);
+
         Student student = getStudentOrThrow(id);
 
         studentMapper.updateEntityFromPatchDto(dto, student);
-        updateFacultyRelationship(student, dto.facultyId());
+
+        if (dto.phoneNumber() != null) {
+            codecPhone(student, dto.phoneNumber());
+        }
+        if (dto.facultyId() != null) {
+            updateFacultyRelationship(student, dto.facultyId());
+        }
+
         logger.info("Student with id {} successfully updated and saved", id);
         return studentMapper.toDto(student);
     }
@@ -87,9 +99,13 @@ public class StudentService {
         }
     }
 
+    private void codecPhone (Student student, String phoneNumber) {
+        student.setPhoneNumber(dataCodecService.encodePhone(phoneNumber));
+    }
+
     public Student editStudent(Student student) {
         if (!studentRepository.existsById(student.getId())) {
-            throw new NotFoundException("ID не найден, изменения не возможно!");
+            throw new EntityNotFoundException("Студент",  student.getId());
         }
         student.setId(student.getId());
         return studentRepository.save(student);
@@ -119,7 +135,7 @@ public class StudentService {
 
         if (student.getFaculty() == null) {
             logger.warn("student faculty null id = {}", studentId);
-            throw new NotFoundException("Уточните информацию данный факультет отсутствует или указан неверно!");
+            throw new ValidationException(AppConstants.ExceptionMessages.INVALID_FACULTY_DATA);
         }
         return student.getFaculty();
     }
@@ -166,5 +182,33 @@ public class StudentService {
     public List<StudentDto> getStudentLimitFiveSortedDesc() {
         List<Student> students = studentRepository.getStudentLimitFive();
         return studentMapper.toDtoList(students);
+    }
+    public  List <String> studentsSteamSorted (String sortedLetter) {
+        return studentRepository.findAll().stream()
+                .map(Student :: getFirstName)
+                .map (String :: toUpperCase)
+                .filter(name -> name.startsWith(sortedLetter.toUpperCase()))
+                .sorted()
+                .toList();
+    }
+
+    public Double getAverageAge () {
+        return studentRepository.findAll().stream()
+                .mapToInt(Student :: getAge)
+                .average()
+                .orElse(0.0);
+    }
+
+    public String getLongestFacultyName () {
+        return facultyRepository.findAll().stream()
+                .map(Faculty ::getName)
+                .max(Comparator.comparingInt(String :: length))
+                .orElse("Факультеты не найдены");
+    }
+
+    public long getSumOptimization() {
+        return LongStream.rangeClosed(1, 1000000)
+                .parallel()
+                .sum();
     }
 }

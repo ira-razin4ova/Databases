@@ -6,8 +6,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.hogwarts.school.dto.avatar.AvatarDto;
-import ru.hogwarts.school.exception.BadRequestException;
-import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.exception.EntityNotFoundException;
+import ru.hogwarts.school.exception.ValidationException;
 import ru.hogwarts.school.mapper.AvatarMapper;
 import ru.hogwarts.school.model.Avatar;
 import ru.hogwarts.school.model.Student;
@@ -53,7 +53,7 @@ public class AvatarService {
         Student student = studentService.getStudentOrThrow(id);
         String contentType = file.getContentType();
         if (contentType == null || !List.of("image/jpeg", "image/png", "image/gif").contains(contentType)) {
-            throw new BadRequestException("Это не картинка! Грузи только jpeg, png или gif.");
+            throw new ValidationException("Это не картинка! Грузи только jpeg, png или gif.");
         }
 
         Path filePath = Path.of (avatarsDir, id + "." + getExtension(file.getOriginalFilename()));
@@ -99,7 +99,7 @@ public class AvatarService {
 
             BufferedImage image = ImageIO.read(bis);
             if (image == null) {
-                throw new BadRequestException("Не удалось прочитать картинку!");
+                throw new ValidationException("Не удалось прочитать картинку!");
             }
             /**
               *Исправляем деление на ноль (через double)
@@ -130,12 +130,12 @@ public class AvatarService {
 
     public AvatarDto findAvatarIdStudent (Long id) {
         Avatar avatar = avatarRepository.findByStudentId(id)
-                .orElseThrow(() -> new NotFoundException("Аватар для студента с id " + id + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Аватар", id ));
         return avatarMapper.toDto(avatar);
     }
     public Avatar getAvatarOrThrow(Long id) {
         return avatarRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Аватар с id " + id + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Аватар", id ));
     }
 
     public byte[] getAvatarDataFromFile(Long id) throws IOException {

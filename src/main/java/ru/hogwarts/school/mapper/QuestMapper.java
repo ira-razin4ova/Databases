@@ -10,7 +10,6 @@ import java.util.List;
 public interface QuestMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "tasks", ignore = true)
     Quest toEntity(CreateQuestDto dto);
 
     @Mapping(target = "tasksTitle", expression = "java(entity.getTasks() != null ? entity.getTasks().stream().map(t -> t.getTitle()).collect(java.util.stream.Collectors.toList()) : null)")
@@ -23,6 +22,7 @@ public interface QuestMapper {
     List<QuestShortDto> toDtoListShort(List<Quest> eventsShort);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "tasks", ignore = true)
     void updateEntityFromDto(PatchQuestDto dto, @MappingTarget Quest entity);
 
 }

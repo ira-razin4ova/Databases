@@ -7,5 +7,5 @@ public record CreateTaskDto(
         String title,
         Integer award,
         Boolean archive,
-        Quest questId) {
+        Long questId) {
 }

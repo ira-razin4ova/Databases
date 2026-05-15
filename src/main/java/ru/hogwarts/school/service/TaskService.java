@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.hogwarts.school.dto.task.CreateTaskDto;
 import ru.hogwarts.school.dto.task.PatchTaskDto;
 import ru.hogwarts.school.dto.task.TaskDto;
-import ru.hogwarts.school.exception.BadRequestException;
-import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.exception.EntityNotFoundException;
+import ru.hogwarts.school.exception.ValidationException;
 import ru.hogwarts.school.mapper.TaskMapper;
 import ru.hogwarts.school.model.Quest;
 import ru.hogwarts.school.model.Task;
@@ -28,10 +28,10 @@ public class TaskService {
     private final TaskMapper taskMapper;
 
     public Task getTaskOrThrow (Long id) {
-        return taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task " + id + "not found"));
+        return taskRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Задача",  id));
     }
     public Quest getQuestOrThrow(Long id) {
-        return questRepository.findById(id).orElseThrow(() -> new NotFoundException("Task " + id + "not found"));
+        return questRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Квест", id));
     }
 
     public List<TaskDto> getAllTasks () {
@@ -48,12 +48,13 @@ public class TaskService {
     public TaskDto createTask (CreateTaskDto dto) {
         Task task = taskMapper.toEntity(dto);
         linkTasksToEvent(task);
+        taskRepository.save(task);
         return taskMapper.toDto(task);
     }
 
     private void linkTasksToEvent(Task task) {
         if (task.getQuest() == null) {
-            throw new BadRequestException("ID ивента не может быть пустым");
+            throw new ValidationException("ID ивента не может быть пустым");
         }
         Quest quest = getQuestOrThrow(task.getQuest().getId());
         task.setQuest(quest);

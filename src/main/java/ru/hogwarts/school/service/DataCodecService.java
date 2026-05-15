@@ -2,7 +2,7 @@ package ru.hogwarts.school.service;
 
 import org.mapstruct.Named;
 import org.springframework.stereotype.Service;
-import ru.hogwarts.school.exception.BadRequestException;
+import ru.hogwarts.school.exception.ValidationException;
 
 import java.util.Map;
 
@@ -30,13 +30,13 @@ public class DataCodecService {
     public String normalizePhoneNumber(String phoneNumber) {
         String cleaned = phoneNumber.replaceAll("[^0-9]", "");
         if (cleaned.length() != 11) {
-            throw new BadRequestException("Номер телефона не корректен");
+            throw new ValidationException("Номер телефона не корректен");
         }
         if (cleaned.startsWith("8")) {
             cleaned = "7" + cleaned.substring(1);
         }
         if (!cleaned.startsWith("79")) {
-            throw new BadRequestException("Номер должен начинаться с 79");
+            throw new ValidationException("Номер должен начинаться с 79");
         }
         return cleaned;
     }

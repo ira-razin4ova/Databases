@@ -4,7 +4,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.dto.product.ProductDTO;
-import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.exception.EntityNotFoundException;
 import ru.hogwarts.school.mapper.ProductMapper;
 import ru.hogwarts.school.model.Category;
 import ru.hogwarts.school.model.Faculty;
@@ -27,7 +27,7 @@ public class ProductService {
     private final ProductMapper productMapper;
 
     public Product getProductOrThrow(Long id) {
-        return productRepository.findById(id).orElseThrow(() -> new NotFoundException("Продукт с id " + id + " не найден"));
+        return productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Продукт", id));
     }
 
     public Product createProduct(Product product) {
@@ -42,7 +42,7 @@ public class ProductService {
         if (product.getCategory() != null && product.getCategory().getId() != null) {
             Long id = product.getId();
             Category existingCategory = categoryRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Категория '" + id + "' не найдена"));
+                    .orElseThrow(() -> new EntityNotFoundException("Категория", id));
 
             product.setCategory(existingCategory);
         }
@@ -56,7 +56,7 @@ public class ProductService {
             List<Faculty> existingFaculties = facultyRepository.findAllById(ids);
 
             if (existingFaculties.size() != ids.size()) {
-                throw new NotFoundException("Некоторые факультеты не были найдены");
+                throw new EntityNotFoundException("факультеты", ids.size(), existingFaculties.size());
             }
 
             product.setFaculties(existingFaculties);

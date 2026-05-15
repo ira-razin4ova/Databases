@@ -8,7 +8,7 @@ import ru.hogwarts.school.dto.faculty.CreateFacultyDto;
 import ru.hogwarts.school.dto.faculty.FacultyDto;
 import ru.hogwarts.school.dto.faculty.PatchFacultyDto;
 import ru.hogwarts.school.dto.student.StudentDto;
-import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.exception.EntityNotFoundException;
 import ru.hogwarts.school.mapper.FacultyMapper;
 import ru.hogwarts.school.mapper.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
@@ -50,7 +50,7 @@ public class FacultyService {
         return facultyRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.warn("There is not faculty with id = {}", id);
-                    return new NotFoundException("Факультет с id " + id + " не найден");
+                    return new EntityNotFoundException("Факультет", id);
                 });
     }
 
@@ -71,7 +71,7 @@ public class FacultyService {
 
     public Faculty editFaculty(Faculty faculty) {
         if (!facultyRepository.existsById(faculty.getId())) {
-            throw new NotFoundException("ID не найден, изменения не возможно!");
+            throw new EntityNotFoundException("Факультет", faculty.getId());
         }
         faculty.setId(faculty.getId());
         return facultyRepository.save(faculty);
@@ -87,7 +87,8 @@ public class FacultyService {
 
     public List<FacultyDto> findByNameOrColor(String name, String color) {
         logger.debug("Was invoked method find by name = {} or color = {} ", name, color);
-        return facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color);
+        List <Faculty> faculties = facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color);
+        return facultyMapper.toDtoList(faculties);
     }
 
     public List<StudentDto> studentsFacultyById(Long facultyId) {

@@ -23,8 +23,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.hogwarts.school.constant.StudentStatus;
 import ru.hogwarts.school.dto.avatar.AvatarDto;
-import ru.hogwarts.school.exception.BadRequestException;
-import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.exception.ValidationException;
+import ru.hogwarts.school.exception.EntityNotFoundException;
 import ru.hogwarts.school.mapper.AvatarMapper;
 import ru.hogwarts.school.model.Avatar;
 import ru.hogwarts.school.model.Faculty;
@@ -170,7 +170,7 @@ public class AvatarServiceTest {
         Path fakeImagePath = Path.of("src/test/resources/avatars/fake_image.png");// файл, который притворяется картинкой, внутри текст
         Files.createDirectories(fakeImagePath.getParent());
         Files.write(fakeImagePath, "Это просто текстовая строка, а не байты картинки".getBytes());
-        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+        ValidationException exception = assertThrows(ValidationException.class, () ->
                 avatarService.generateImagePreview(fakeImagePath));
 
         assertEquals("Не удалось прочитать картинку!", exception.getMessage());  // Проверяем сообщение внутри ошибки
@@ -210,7 +210,7 @@ public class AvatarServiceTest {
     @Test
     void uploadAvatarIllegalFileTest() {
 
-        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+        ValidationException exception = assertThrows(ValidationException.class, () ->
                 avatarService.uploadAvatar(1L, illegalFile));
         assertEquals("Это не картинка! Грузи только jpeg, png или gif.", exception.getMessage());
     }
@@ -221,7 +221,7 @@ public class AvatarServiceTest {
 
         when(studentService.getStudentOrThrow(testStudent.getId())).thenReturn(testStudent);
 
-        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+        ValidationException exception = assertThrows(ValidationException.class, () ->
                 avatarService.uploadAvatar(1L, nullTypeFile));
 
         assertEquals("Это не картинка! Грузи только jpeg, png или gif.", exception.getMessage());
@@ -268,7 +268,7 @@ public class AvatarServiceTest {
 
         when(avatarRepository.findByStudentId(testStudent.getId())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 avatarService.findAvatarIdStudent(testStudent.getId()));
 
         verify(avatarRepository, times(1)).findByStudentId(testStudent.getId());

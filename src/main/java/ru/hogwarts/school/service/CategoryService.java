@@ -3,6 +3,7 @@ package ru.hogwarts.school.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hogwarts.school.dto.category.CategoryDto;
+import ru.hogwarts.school.exception.EntityNotFoundException;
 import ru.hogwarts.school.exception.NotFoundException;
 import ru.hogwarts.school.mapper.CategoryMapper;
 import ru.hogwarts.school.model.Category;
@@ -21,7 +22,7 @@ public class CategoryService {
     }
 
     public Category getCategoryOrThrow(Long id) {
-        return categoryRepository.findById(id).orElseThrow(() -> new NotFoundException("Категория с" + id + "не найдена"));
+        return categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Категория" , id));
     }
 
     public CategoryDto getByIdCategory(Long id) {

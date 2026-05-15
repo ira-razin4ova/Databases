@@ -25,19 +25,19 @@ public class InfoController {
         return ("Приложение запущено на порту: " + servicePort);
     }
 
-    @GetMapping ("/studentsSteamSorted")
-    public ResponseEntity <List <String>> getStudentsSteamSorted(@RequestParam String sortedLetter) {
-    return ResponseEntity.ok (studentService.studentsSteamSorted(sortedLetter));
+    @GetMapping("/studentsSteamSorted")
+    public ResponseEntity<List<String>> getStudentsSteamSorted(@RequestParam String sortedLetter) {
+        return ResponseEntity.ok(studentService.studentsSteamSorted(sortedLetter));
     }
 
-    @GetMapping ("/getAverageAge")
-    public ResponseEntity <Double> getAverageAge() {
-        return ResponseEntity.ok (studentService.getAverageAge());
+    @GetMapping("/getAverageAge")
+    public ResponseEntity<Double> getAverageAge() {
+        return ResponseEntity.ok(studentService.getAverageAge());
     }
 
-    @GetMapping ("/getLongestFacultyName")
-    public ResponseEntity <String> getLongestFacultyName() {
-        return ResponseEntity.ok (studentService.getLongestFacultyName());
+    @GetMapping("/getLongestFacultyName")
+    public ResponseEntity<String> getLongestFacultyName() {
+        return ResponseEntity.ok(studentService.getLongestFacultyName());
     }
 
     @GetMapping("/sum")

@@ -2,6 +2,7 @@ package ru.hogwarts.school.mapper;
 
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.PatchStudentDto;
 import ru.hogwarts.school.dto.student.StudentDto;
@@ -19,10 +20,14 @@ public abstract class StudentMapper {
     @Autowired
     protected AvatarMapper avatarMapper;
 
+    @Autowired
+    protected MessageSource messageSource;
+
     @Mapping(source = "faculty.name", target = "faculty")
     @Mapping(source = "avatar", target = "avatar")
     @Mapping(source = "studentTicket", target = "numberTicket")
     @Mapping(target = "phoneNumber", ignore = true)
+    @Mapping(target = "statusLocalized", ignore = true)
     public abstract StudentDto toDto(Student entity);
 
     @AfterMapping
@@ -33,9 +38,21 @@ public abstract class StudentMapper {
     }
 
     @AfterMapping
-    protected void fillStudentId(@MappingTarget StudentDto dto, Student entity) {
+    protected void fillStudentId(Student entity, @MappingTarget StudentDto dto) {
         if (dto.getAvatar() != null && entity.getId() != null) {
             dto.getAvatar().setStudentId(entity.getId());
+        }
+    }
+
+    @AfterMapping
+    protected void mapLocalizedStatus(Student entity, @MappingTarget StudentDto dto) {
+        if (entity.getStudentStatus() != null) {
+            String localized = messageSource.getMessage(
+                    "student.status." + entity.getStudentStatus().name(),
+                    null,
+                    org.springframework.context.i18n.LocaleContextHolder.getLocale()
+            );
+            dto.setStatusLocalized(localized);
         }
     }
 

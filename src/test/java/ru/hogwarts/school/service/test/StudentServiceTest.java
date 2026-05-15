@@ -13,7 +13,7 @@ import ru.hogwarts.school.constant.StudentStatus;
 import ru.hogwarts.school.dto.avatar.AvatarDto;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.StudentDto;
-import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.exception.EntityNotFoundException;
 import ru.hogwarts.school.mapper.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -53,6 +53,7 @@ public class StudentServiceTest {
         Student student5 = new Student(5L, "Михаил", "Бачурин", 19, null, StudentStatus.ACTIVE);
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4, student5));
         AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", student1.getId());
+
 // 1. Создаем StudentDTO (то, что маппер отдаст в конце)
         StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456",1);
         StudentDto sDto2 = new StudentDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457",1);
@@ -117,7 +118,7 @@ public class StudentServiceTest {
     void resolveFacultyOtThrowStudentFacultyNull() {
         CreateStudentDto dto = createDtosTest.get(0);
         when(facultyRepository.findById(dto.getIdFaculty())).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 studentService.getFacultyOrThrow(dto.getIdFaculty()));
         verify(studentRepository, never()).save(any());
     }
@@ -126,7 +127,7 @@ public class StudentServiceTest {
     void resolveFacultyOtThrowStudentFacultyNotFound() {
         Long id = 10L;
         when(facultyRepository.findById(id)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 studentService.getFacultyOrThrow(id));
     }
 
@@ -145,7 +146,7 @@ public class StudentServiceTest {
     @ValueSource(longs = {6L, 7L, 8L, 9L, 10L})
     void studentNotFound(Long longs) {
         when(studentRepository.findById(longs)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 studentService.getStudentOrThrow(longs));
         verify(studentRepository, times(1)).findById(longs);
     }
@@ -176,7 +177,7 @@ public class StudentServiceTest {
         Student testStudent = studentsTest.get(index);
         when(studentRepository.existsById(testStudent.getId())).thenReturn(false);
 
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 studentService.editStudent(testStudent));
         verify(studentRepository, never()).save(any());
     }
@@ -186,7 +187,7 @@ public class StudentServiceTest {
     void studentDeleteNotFound(Long longs) {
         when(studentRepository.findById(longs)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 studentService.deleteStudent(longs));
         verify(studentRepository, never()).deleteById(longs);
     }
@@ -212,6 +213,12 @@ public class StudentServiceTest {
                 .toList();
 
         when(studentRepository.findByAge(age)).thenReturn(expectedStudent);
+
+        List<StudentDto> mockDtos = studentDtosTest.stream()
+                .filter(d -> d.getAge() == age)
+                .toList();
+
+        when(studentMapper.toDtoList(expectedStudent)).thenReturn(mockDtos);
 
         List<StudentDto> result = studentService.findByAge(age);
 
@@ -245,6 +252,12 @@ public class StudentServiceTest {
 
         when(studentRepository.findByAgeBetween(from, to)).thenReturn(expectedStudent);
 
+        List<StudentDto> expectedDto =studentDtosTest .stream()
+                .filter(s -> s.getAge() >= from && s.getAge() <= to)
+                .toList();
+
+        when(studentMapper.toDtoList(expectedStudent)).thenReturn(expectedDto);
+
         List<StudentDto> result = studentService.findByAgeBetween(from, to);
 
         assertEquals(expectedStudent.size(), result.size());
@@ -270,7 +283,7 @@ public class StudentServiceTest {
     void findFacultyByStudentIdStudentFacultyIdNull() {
         Student testStudent = studentsTest.get(4);
 
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 studentService.getFacultyByStudentId(testStudent.getId()));
     }
 
@@ -279,7 +292,7 @@ public class StudentServiceTest {
         Student testStudent = studentsTest.get(0);
         Long facultyId = testStudent.getFaculty().getId();
         when(studentRepository.findById(facultyId)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 studentService.getFacultyByStudentId(testStudent.getId()));
     }
 

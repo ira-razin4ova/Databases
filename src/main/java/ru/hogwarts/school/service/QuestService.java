@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hogwarts.school.dto.quest.*;
 import ru.hogwarts.school.dto.task.PatchTaskDto;
-import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.exception.EntityNotFoundException;
 import ru.hogwarts.school.mapper.QuestMapper;
 import ru.hogwarts.school.mapper.TaskMapper;
 import ru.hogwarts.school.model.Quest;
@@ -27,7 +27,7 @@ public class QuestService {
 
     public Quest getQuestOrThrow(Long id) {
         return questRepository.findByIdWithTasks(id).
-                orElseThrow(() -> new NotFoundException("Quest " + id + "not found"));
+                orElseThrow(() -> new EntityNotFoundException("Quest",  id));
     }
 
     public QuestDto getByIdQuest(Long id) {
@@ -56,23 +56,23 @@ public class QuestService {
     }
 
     @Transactional
-    public QuestFullDto createEvent(CreateQuestDto dto) {
+    public QuestFullDto createQuest(CreateQuestDto dto) {
         Quest quest = questMapper.toEntity(dto);
 
-        linkTasksToEvent(quest);
+        linkTasksToQuest(quest);
 
         Quest savedQuest = questRepository.save(quest);
         return questMapper.toDtoFull(savedQuest);
     }
 
-    private void linkTasksToEvent(Quest quest) {
+    private void linkTasksToQuest(Quest quest) {
         if (quest.getTasks() != null) {
             quest.getTasks().forEach(task -> task.setQuest(quest));
         }
     }
 
     @Transactional
-    public QuestFullDto patchEvent(Long id, PatchQuestDto patchDto) {
+    public QuestFullDto updateQuest(Long id, PatchQuestDto patchDto) {
         Quest quest = getQuestOrThrow(id);
 
         questMapper.updateEntityFromDto(patchDto, quest);
@@ -102,7 +102,7 @@ public class QuestService {
         Task existingTask = quest.getTasks().stream()
                 .filter(t -> t.getId().equals(taskDto.id()))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("Задача с id " + taskDto.id() + " не найдена в этом ивенте"));
+                .orElseThrow(() -> new EntityNotFoundException("Задача" , taskDto.id(), "не найдена для квеста", quest.getId()));
 
         taskMapper.updateEntityFromPatchDto(taskDto, existingTask);
     }
@@ -124,7 +124,7 @@ public class QuestService {
     }
 
     @Transactional
-    public void deleteEvent(Long id) {
+    public void deleteQuest(Long id) {
         Quest delereQuest = getQuestOrThrow(id);
         questRepository.delete(delereQuest);
     }

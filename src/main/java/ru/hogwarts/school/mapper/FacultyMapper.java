@@ -6,6 +6,8 @@ import ru.hogwarts.school.dto.faculty.FacultyDto;
 import ru.hogwarts.school.dto.faculty.PatchFacultyDto;
 import ru.hogwarts.school.model.Faculty;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface FacultyMapper {
 
@@ -17,5 +19,7 @@ public interface FacultyMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     void updateEntityFromPatchDto(PatchFacultyDto dto, @MappingTarget Faculty entity);
+
+    List <FacultyDto> toDtoList (List <Faculty> faculties);
 
 }

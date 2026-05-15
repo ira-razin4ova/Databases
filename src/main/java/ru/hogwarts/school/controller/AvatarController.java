@@ -24,6 +24,7 @@ public class AvatarController {
     public AvatarController(AvatarService avatarService) {
         this.avatarService = avatarService;
     }
+
     @PostMapping(value = "/{studentId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AvatarDto> uploadAvatar(
             @PathVariable @NotNull Long studentId,
@@ -33,8 +34,8 @@ public class AvatarController {
                 .body(avatarService.uploadAvatar(studentId, avatar));
     }
 
-    @GetMapping ("student/{id}")
-    public ResponseEntity <AvatarDto> findByIdStudent (@PathVariable @Positive Long id) {
+    @GetMapping("student/{id}")
+    public ResponseEntity<AvatarDto> findByIdStudent(@PathVariable @Positive Long id) {
         return ResponseEntity.ok(avatarService.findAvatarIdStudent(id));
     }
 
@@ -73,8 +74,8 @@ public class AvatarController {
                 .body(data);
     }
 
-    @GetMapping ("/avatar-paging")
-    public ResponseEntity <List<AvatarDto>> getAvatarPaging (@RequestParam ("page") Integer pageNumber, @RequestParam ("size") Integer pageSize) {
+    @GetMapping("/avatar-paging")
+    public ResponseEntity<List<AvatarDto>> getAvatarPaging(@RequestParam("page") Integer pageNumber, @RequestParam("size") Integer pageSize) {
         return ResponseEntity.ok(avatarService.getAvatarPagingSorting(pageNumber, pageSize));
     }
 

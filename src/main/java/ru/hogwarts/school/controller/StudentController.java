@@ -39,17 +39,17 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity <StudentDto> createStudent(@RequestBody @Valid CreateStudentDto dto) {
+    public ResponseEntity<StudentDto> createStudent(@RequestBody @Valid CreateStudentDto dto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(studentService.createStudent(dto));
     }
+
     @PatchMapping("/{id}")
     public ResponseEntity<StudentDto> updateStudent(
             @PathVariable Long id,
-            @Valid @RequestBody PatchStudentDto dto)
-    {
-        return ResponseEntity.ok(studentService.patchStudent(id,dto));
+            @Valid @RequestBody PatchStudentDto dto) {
+        return ResponseEntity.ok(studentService.updateStudent(id, dto));
     }
 
     @PutMapping("{id}")
@@ -66,13 +66,13 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity <List<StudentDto>> getStudentsByAge(@RequestParam int age) {
+    public ResponseEntity<List<StudentDto>> getStudentsByAge(@RequestParam int age) {
         return ResponseEntity.ok(studentService.findByAge(age));
     }
 
     @GetMapping("/age")
-    public ResponseEntity <List<StudentDto>> getFindByAgeBetween(@RequestParam int from,
-                                                                 @RequestParam int to) {
+    public ResponseEntity<List<StudentDto>> getFindByAgeBetween(@RequestParam int from,
+                                                                @RequestParam int to) {
         return ResponseEntity.ok(studentService.findByAgeBetween(from, to));
     }
 
@@ -89,24 +89,25 @@ public class StudentController {
         headers.setContentType(MediaType.TEXT_PLAIN);
         return ResponseEntity.ok().headers(headers).body(data);
     }
+
     @GetMapping("/dto/{id}")
     public ResponseEntity<StudentDto> getStudentByIdDTO(@PathVariable Long id) {
 
-        return ResponseEntity.ok( studentService.getByIdDTO(id));
+        return ResponseEntity.ok(studentService.getByIdDTO(id));
     }
 
-    @GetMapping ("/count")
-    public ResponseEntity <Long> getStudentCount () {
+    @GetMapping("/count")
+    public ResponseEntity<Long> getStudentCount() {
         return ResponseEntity.ok(studentService.getStudentCount());
     }
 
-    @GetMapping ("/age-avg")
-    public ResponseEntity <Double> getStudentAgeAvg () {
+    @GetMapping("/age-avg")
+    public ResponseEntity<Double> getStudentAgeAvg() {
         return ResponseEntity.ok(studentService.getStudentAgeAvg());
     }
 
-    @GetMapping ("/limit")
-    public ResponseEntity  <List <StudentDto>> getStudentLimit () {
+    @GetMapping("/limit")
+    public ResponseEntity<List<StudentDto>> getStudentLimit() {
         return ResponseEntity.ok(studentService.getStudentLimitFiveSortedDesc());
     }
 }

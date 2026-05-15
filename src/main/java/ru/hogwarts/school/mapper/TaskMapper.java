@@ -16,7 +16,7 @@ public interface TaskMapper {
     TaskDto toDto(Task entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "quest", ignore = true)
+    @Mapping(source = "questId", target = "quest.id")
     Task toEntity(CreateTaskDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

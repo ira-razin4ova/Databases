@@ -22,7 +22,7 @@ public class QuestController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity <QuestDto> getEventById(@PathVariable @Positive Long id) {
+    public ResponseEntity<QuestDto> getQuestById(@PathVariable @Positive Long id) {
         return ResponseEntity.ok(questService.getByIdQuest(id));
     }
 
@@ -37,12 +37,12 @@ public class QuestController {
     }
 
     @GetMapping("/short-all")
-    public ResponseEntity<List <QuestShortDto>> getAllShortQuest() {
+    public ResponseEntity<List<QuestShortDto>> getAllShortQuest() {
         return ResponseEntity.ok(questService.getByAllQuestShort());
     }
 
     @GetMapping("active/{studentId}")
-    public ResponseEntity <List <QuestDto>> getQuestActive (@PathVariable @Positive Long studentId) {
+    public ResponseEntity<List<QuestDto>> getQuestActive(@PathVariable @Positive Long studentId) {
         return ResponseEntity.ok(questService.getByQuestActive(studentId));
     }
 
@@ -50,23 +50,23 @@ public class QuestController {
     public ResponseEntity<QuestFullDto> createQuest(@RequestBody @Valid CreateQuestDto createQuestDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(questService.createEvent(createQuestDto));
+                .body(questService.createQuest(createQuestDto));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<QuestFullDto> updateQuestAndTasksAndCreateTask(@PathVariable @Positive Long id,
-                                                                        @RequestBody @Valid PatchQuestDto patchQuestDto) {
-        return ResponseEntity.ok(questService.patchEvent(id, patchQuestDto));
+                                                                         @RequestBody @Valid PatchQuestDto patchQuestDto) {
+        return ResponseEntity.ok(questService.updateQuest(id, patchQuestDto));
     }
 
-    @GetMapping ("/check/{id}")
-    public ResponseEntity <CheckTaskFotThisQuestDto> checkTaskFotThisQuest(@PathVariable @Positive Long id){
+    @GetMapping("/check/{id}")
+    public ResponseEntity<CheckTaskFotThisQuestDto> checkTaskFotThisQuest(@PathVariable @Positive Long id) {
         return ResponseEntity.ok(questService.checkBeforeDelete(id));
     }
 
-    @DeleteMapping ("/{id}")
-    public ResponseEntity <String> deleteQuestAndTasksThisQuest (@PathVariable @Positive Long id) {
-        questService.deleteEvent(id);
-        return ResponseEntity.ok("Event" +id + "and this tasks successfully removed");
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteQuest(@PathVariable @Positive Long id) {
+        questService.deleteQuest(id);
+        return ResponseEntity.noContent().build();
     }
 }

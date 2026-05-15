@@ -15,7 +15,9 @@ import ru.hogwarts.school.dto.faculty.CreateFacultyDto;
 import ru.hogwarts.school.dto.faculty.FacultyDto;
 import ru.hogwarts.school.dto.student.CreateStudentDto;
 import ru.hogwarts.school.dto.student.StudentDto;
-import ru.hogwarts.school.exception.NotFoundException;
+import ru.hogwarts.school.exception.EntityNotFoundException;
+import ru.hogwarts.school.mapper.FacultyMapper;
+import ru.hogwarts.school.mapper.StudentMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
@@ -51,14 +53,14 @@ public class FacultyServiceTest {
 
         facultyTest = new ArrayList<>(List.of(faculty1, faculty2, faculty3, faculty4));
 
-        List<FacultyDto> facultyDtoList = List.of(
+                    facultyDtoList = List.of(
                 new FacultyDto(1L, "Химия", "Красный", new BigDecimal("1000.00")),
                 new FacultyDto(2L, "Физика", "Синий", new BigDecimal("2500.50")),
                 new FacultyDto(3L, "Биология", "Зеленый", new BigDecimal("0.00")),
                 new FacultyDto(4L, "Математика", "Белый", new BigDecimal("50000.00"))
         );
 
-        List<CreateFacultyDto> createFacultyDtoList = List.of(
+        createFacultyDtoList = List.of(
                 new CreateFacultyDto("Химия", "Красный"),
                 new CreateFacultyDto("Физика", "Синий"),
                 new CreateFacultyDto("Биология", "Зеленый"),
@@ -66,20 +68,20 @@ public class FacultyServiceTest {
         );
 
         Student student1 = new Student(1L, "Артём", "Смирнов", 23, faculty1, StudentStatus.ACTIVE);
-        Student student2 = new Student(2L, "Мария","Леонова", 20, faculty1, StudentStatus.ACTIVE);
-        Student student3 = new Student(3L, "Марат", "Измалков",18, faculty1, StudentStatus.ACTIVE);
+        Student student2 = new Student(2L, "Мария", "Леонова", 20, faculty1, StudentStatus.ACTIVE);
+        Student student3 = new Student(3L, "Марат", "Измалков", 18, faculty1, StudentStatus.ACTIVE);
         Student student4 = new Student(4L, "Софья", "Афонина", 18, faculty1, StudentStatus.ACTIVE);
-        Student student5 = new Student(5L, "Михаил", "Бачурин", 19, null, StudentStatus.ACTIVE);
+        Student student5 = new Student(5L, "Михаил", "Бачурин", 19, faculty1, StudentStatus.ACTIVE);
 
         studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4, student5));
 
         AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", student1.getId());
 
-        StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456",1);
-        StudentDto sDto2 = new StudentDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457",1);
-        StudentDto sDto3 = new StudentDto(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458",1);
-        StudentDto sDto4 = new StudentDto(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459",1);
-        StudentDto sDto5 = new StudentDto(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460",1);
+        StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456", 1);
+        StudentDto sDto2 = new StudentDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457", 1);
+        StudentDto sDto3 = new StudentDto(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458", 1);
+        StudentDto sDto4 = new StudentDto(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459", 1);
+        StudentDto sDto5 = new StudentDto(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460", 1);
 
         studentDtosTest = new ArrayList<>(List.of(sDto1, sDto2, sDto3, sDto4, sDto5));
     }
@@ -89,6 +91,12 @@ public class FacultyServiceTest {
 
     @Mock
     private FacultyRepository facultyRepository;
+
+    @Mock
+    private FacultyMapper facultyMapper;
+
+    @Mock
+    private StudentMapper studentMapper;
 
     @Mock
     private FacultyDto facultyDto;
@@ -103,8 +111,15 @@ public class FacultyServiceTest {
     @ValueSource(ints = {0, 1, 2, 3})
     void createFaculty(int ints) {
         CreateFacultyDto test = createFacultyDtoList.get(ints);
+        System.out.println(test);
+        Faculty faculty = facultyTest.get(ints);
+        System.out.println(faculty);
+        when(facultyMapper.toEntity(test)).thenReturn(faculty);
 
         when(facultyRepository.save(any(Faculty.class))).thenAnswer(i -> i.getArgument(0));
+
+        when(facultyMapper.toDto(any(Faculty.class))).thenReturn(facultyDtoList.get(ints));
+
         FacultyDto result = facultyService.createFaculty(test);
 
         assertNotNull(result);
@@ -137,7 +152,7 @@ public class FacultyServiceTest {
 
         when(facultyRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 facultyService.getFacultyOrThrow(id));
 
     }
@@ -145,7 +160,7 @@ public class FacultyServiceTest {
     @ParameterizedTest
     @NullSource
     void facultyByIdNull(Long argument) {
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 facultyService.getFacultyOrThrow(argument));
     }
 
@@ -180,13 +195,13 @@ public class FacultyServiceTest {
 
         when(facultyRepository.existsById(id)).thenReturn(false);
 
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 facultyService.editFaculty(testFaculty));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 2, 3})
-    void deleteFacultySuccess (int ints) {
+    void deleteFacultySuccess(int ints) {
         Faculty testFaculty = facultyTest.get(ints);
         Long id = testFaculty.getId();
 
@@ -199,44 +214,50 @@ public class FacultyServiceTest {
 
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 2, 3})
-    void deleteFacultyNotFound (int ints) {
+    void deleteFacultyNotFound(int ints) {
         Faculty testFaculty = facultyTest.get(ints);
         Long id = testFaculty.getId();
 
         when(facultyRepository.findById(id)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 facultyService.deleteFaculty(id));
     }
+
     @ParameterizedTest
     @CsvSource({
-            "Биология, null ",
+            "Биология, null",
             "null, Красный",
             "Биология, Красный"
     })
     void findByNameOrColorTest(String name, String color) {
         // 1. Подготовка: создаем список, который "якобы" нашла база
-        List<FacultyDto> expectedFaculties = facultyDtoList.stream()
-                .filter(f -> f.name().equals(name) || f.color().equals(color))
+
+        List<Faculty> expectedFaculties = facultyTest.stream()
+                .filter(f -> f.getName().equals(name) || f.getColor().equals(color))
                 .toList();
 
         when(facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color))
                 .thenReturn(expectedFaculties);
 
+        List<FacultyDto> expectedDtos = expectedFaculties.stream()
+                .map(f -> new FacultyDto(f.getId(), f.getName(), f.getColor(), f.getBalance()))
+                .toList();
+        when(facultyMapper.toDtoList(expectedFaculties)).thenReturn(expectedDtos);
+
         List<FacultyDto> result = facultyService.findByNameOrColor(name, color);
 
         assertNotNull(result);
         assertEquals(expectedFaculties.size(), result.size());
-
-
         verify(facultyRepository).findByNameIgnoreCaseOrColorIgnoreCase(name, color);
     }
 
     @ParameterizedTest
-    @ValueSource (longs = {1L, 2L, 3L})
-    void studentSearchIdFaculty (Long facultyId) {
-        List <Student> expectedStudent = studentsTest.stream()
+    @ValueSource(longs = {1L, 2L, 3L})
+    void studentSearchIdFaculty(Long facultyId) {
+        List<Student> expectedStudent = studentsTest.stream()
                 .filter(s -> s.getFaculty().equals(facultyId))
                 .toList();
+
         when(studentRepository.findByFaculty_Id(facultyId)).thenReturn(expectedStudent);
 
         List<StudentDto> result = facultyService.studentsFacultyById(facultyId);
@@ -263,12 +284,12 @@ public class FacultyServiceTest {
                 when(facultyRepository.findById(id)).thenReturn(Optional.empty());
 
                 // 2. Ловим исключение
-                NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
                         facultyService.getFacultyOrThrow(id)
                 );
 
                 // 3. Проверяем твой текст ошибки
-                assertEquals("Факультет с таким " + id + " не найден", exception.getMessage());
+               assertEquals("Факультет с таким " + id + " не найден", exception.getMessage());
 
                 // Бонус: проверяем, что репозиторий вызывался именно с этим ID
                 verify(facultyRepository).findById(id);

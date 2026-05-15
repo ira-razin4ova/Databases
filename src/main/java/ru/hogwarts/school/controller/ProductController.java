@@ -34,10 +34,11 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable @Positive Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable @Positive Long id) {
         productService.deleteProduct(id);
-        return ResponseEntity.ok("Продукт с id " + id + " успешно удален");
+        return ResponseEntity.noContent().build();
     }
+
     @GetMapping("size-product/{id}")
     public List<ProductSize> getProductSize(@PathVariable @Positive Long id) {
         return productService.findAllSizesByProductId(id);

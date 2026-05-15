@@ -54,8 +54,8 @@ public class StudentService {
         logger.debug("Was invoked method for find Faculty");
         return facultyRepository.findById(id)
                 .orElseThrow(() -> {
-                   logger.warn("There is not faculty with id = {}", id);
-                   return new EntityNotFoundException("Факультет", id);
+                    logger.warn("There is not faculty with id = {}", id);
+                    return new EntityNotFoundException("Факультет", id);
                 });
     }
 
@@ -63,8 +63,8 @@ public class StudentService {
         logger.debug("Was invoked method for find Student with id = {} ", id);
         return studentRepository.findById(id)
                 .orElseThrow(() -> {
-                   logger.warn("There is not student with id = {}", id);
-                    return new EntityNotFoundException("Студент",  id);
+                    logger.warn("There is not student with id = {}", id);
+                    return new EntityNotFoundException("Студент", id);
                 });
     }
 
@@ -99,17 +99,18 @@ public class StudentService {
         }
     }
 
-    private void codecPhone (Student student, String phoneNumber) {
+    private void codecPhone(Student student, String phoneNumber) {
         student.setPhoneNumber(dataCodecService.encodePhone(phoneNumber));
     }
 
     public Student editStudent(Student student) {
         if (!studentRepository.existsById(student.getId())) {
-            throw new EntityNotFoundException("Студент",  student.getId());
+            throw new EntityNotFoundException("Студент", student.getId());
         }
         student.setId(student.getId());
         return studentRepository.save(student);
     }
+
     @Transactional
     public void deleteStudent(Long id) {
         Student studentToDelete = getStudentOrThrow(id);
@@ -119,13 +120,13 @@ public class StudentService {
 
     public List<StudentDto> findByAge(int age) {
         logger.info("Was invoked method find by age = {} ", age);
-        List <Student> students = studentRepository.findByAge(age);
+        List<Student> students = studentRepository.findByAge(age);
         return studentMapper.toDtoList(students);
     }
 
     public List<StudentDto> findByAgeBetween(int from, int to) {
         logger.info("Was invoked method find by age between from = {} - to = {} ", from, to);
-        List <Student> students = studentRepository.findByAgeBetween(from, to);
+        List<Student> students = studentRepository.findByAgeBetween(from, to);
         return studentMapper.toDtoList(students);
     }
 
@@ -183,26 +184,27 @@ public class StudentService {
         List<Student> students = studentRepository.getStudentLimitFive();
         return studentMapper.toDtoList(students);
     }
-    public  List <String> studentsSteamSorted (String sortedLetter) {
+
+    public List<String> studentsSteamSorted(String sortedLetter) {
         return studentRepository.findAll().stream()
-                .map(Student :: getFirstName)
-                .map (String :: toUpperCase)
+                .map(Student::getFirstName)
+                .map(String::toUpperCase)
                 .filter(name -> name.startsWith(sortedLetter.toUpperCase()))
                 .sorted()
                 .toList();
     }
 
-    public Double getAverageAge () {
+    public Double getAverageAge() {
         return studentRepository.findAll().stream()
-                .mapToInt(Student :: getAge)
+                .mapToInt(Student::getAge)
                 .average()
                 .orElse(0.0);
     }
 
-    public String getLongestFacultyName () {
+    public String getLongestFacultyName() {
         return facultyRepository.findAll().stream()
-                .map(Faculty ::getName)
-                .max(Comparator.comparingInt(String :: length))
+                .map(Faculty::getName)
+                .max(Comparator.comparingInt(String::length))
                 .orElse("Факультеты не найдены");
     }
 

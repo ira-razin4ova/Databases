@@ -14,6 +14,7 @@ import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.service.FacultyService;
 
 import java.util.List;
+
 @Validated
 @RestController
 @RequestMapping("/api/v1/faculties")
@@ -26,12 +27,12 @@ public class FacultyController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity <FacultyDto> getByIdFaculty(@PathVariable @Positive Long id) {
+    public ResponseEntity<FacultyDto> getByIdFaculty(@PathVariable @Positive Long id) {
         return ResponseEntity.ok(facultyService.getById(id));
     }
 
     @PostMapping
-    public ResponseEntity <FacultyDto> createFaculty(@RequestBody @Valid CreateFacultyDto dto) {
+    public ResponseEntity<FacultyDto> createFaculty(@RequestBody @Valid CreateFacultyDto dto) {
         return ResponseEntity.
                 status(HttpStatus.CREATED)
                 .body(facultyService.createFaculty(dto));
@@ -40,9 +41,8 @@ public class FacultyController {
     @PatchMapping("/{id}")
     public ResponseEntity<FacultyDto> updateFaculty(
             @PathVariable Long id,
-            @Valid @RequestBody PatchFacultyDto dto)
-    {
-        return ResponseEntity.ok(facultyService.updateFaculty(id,dto));
+            @Valid @RequestBody PatchFacultyDto dto) {
+        return ResponseEntity.ok(facultyService.updateFaculty(id, dto));
     }
 
     @PutMapping("{id}")
@@ -52,19 +52,19 @@ public class FacultyController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteFaculty(@PathVariable @Positive Long id) {
+    public ResponseEntity<Void> deleteFaculty(@PathVariable @Positive Long id) {
         facultyService.deleteFaculty(id);
-        return ResponseEntity.ok("Факультет с ID " + id + " успешно удален");
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public List<FacultyDto> getFindByNameOrColor(@RequestParam(required = false) String name,
-                                              @RequestParam(required = false) String color) {
-        return facultyService.findByNameOrColor(name, color);
+    public ResponseEntity<List<FacultyDto>> getFindByNameOrColor(@RequestParam(required = false) String name,
+                                                                 @RequestParam(required = false) String color) {
+        return ResponseEntity.ok(facultyService.findByNameOrColor(name, color));
     }
 
     @GetMapping("{id}/faculty")
-    public List<StudentDto> getFindStudentByIdFaculty(@PathVariable @Positive Long id) {
-        return facultyService.studentsFacultyById(id);
+    public ResponseEntity<List<StudentDto>> getFindStudentByIdFaculty(@PathVariable @Positive Long id) {
+        return ResponseEntity.ok(facultyService.studentsFacultyById(id));
     }
 }

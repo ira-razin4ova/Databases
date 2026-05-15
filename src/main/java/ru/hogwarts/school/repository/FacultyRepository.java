@@ -16,7 +16,7 @@ public interface FacultyRepository extends JpaRepository <Faculty, Long> {
             "LOWER(name COLLATE \"ru_RU.UTF-8\") = LOWER(:name COLLATE \"ru_RU.UTF-8\") OR " +
             "LOWER(color COLLATE \"ru_RU.UTF-8\") = LOWER(:color COLLATE \"ru_RU.UTF-8\")",
             nativeQuery = true)
-    List<FacultyDto> findByRussianNameOrColor(@Param("name") String name, @Param("color") String color);
+    List<Faculty> findByRussianNameOrColor(@Param("name") String name, @Param("color") String color);
 
-    List<FacultyDto> findByNameIgnoreCaseOrColorIgnoreCase (String name, String color);
+    List<Faculty> findByNameIgnoreCaseOrColorIgnoreCase (String name, String color);
 }

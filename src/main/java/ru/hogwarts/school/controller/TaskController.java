@@ -41,12 +41,15 @@ public class TaskController {
                 .body(taskService.createTask(createTaskDto));
     }
 
-    @PostMapping ("/{id}")
-    public ResponseEntity <TaskDto> updateTask (@PathVariable @Positive Long id,
-                               @RequestBody @Valid PatchTaskDto patchTaskDto) {
+    @PatchMapping("/{id}")
+    public ResponseEntity<TaskDto> updateTask(@PathVariable @Positive Long id,
+                                              @RequestBody @Valid PatchTaskDto patchTaskDto) {
         return ResponseEntity.ok(taskService.patchTask(id, patchTaskDto));
     }
 
-
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTask(@PathVariable @Positive Long id) {
+        taskService.deleteTask(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -21,10 +21,12 @@ public class StudentDto {
     private String phoneNumber;
     private String numberTicket;
     private Integer course;
+    private String statusLocalized;
 
 
     public StudentDto(Long id, int age, String firstName, String lastName, String faculty, AvatarDto avatar, StudentStatus studentStatus, String numberPhone, String numberTicket,
-                      Integer course) {
+                      Integer course,
+                      String statusLocalized) {
         this.id = id;
         this.age = age;
         this.firstName = firstName;
@@ -35,6 +37,7 @@ public class StudentDto {
         this.phoneNumber = numberPhone;
         this.numberTicket = numberTicket;
         this.course = course;
+        this.statusLocalized = statusLocalized;
 
     }
 }

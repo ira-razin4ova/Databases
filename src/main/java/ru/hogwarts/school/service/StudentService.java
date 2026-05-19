@@ -222,67 +222,65 @@ public class StudentService {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public void studentThread () {
-        List <StudentDto> forThread = getAllStudentsSortedByName();
+    public void studentThread() {
+        List<StudentDto> forThread = getAllStudentsSortedByName();
         for (StudentDto s : forThread) {
-            System.out.println(s.getFirstName() );
+            System.out.println(s.getFirstName());
         }
-        int countForThread  = forThread.size() /3;
+        int countForThread = forThread.size() / 3;
+
+            for (int i = 0; i < countForThread; i++) {
+
+                System.out.println("Thread main " + forThread.get(i).getFirstName());
+            }
 
         Thread thread1 = new Thread(() -> {
-        for (int i = 0; i < countForThread; i++) {
-
-            System.out.println("Thread №1 " + forThread.get(i).getFirstName());
-        }
-        });
-
-        Thread thread2 = new Thread (() -> {
             for (int i = countForThread; i < countForThread * 2; i++) {
 
-                System.out.println("Thread №2 " + forThread.get(i).getFirstName());
+                System.out.println("Thread №1 " + forThread.get(i).getFirstName());
             }
         });
 
-        Thread thread3 = new Thread(() -> {
+        Thread thread2 = new Thread(() -> {
             for (int i = countForThread * 2; i < countForThread * 3; i++) {
 
-                System.out.println("Thread №3 " + forThread.get(i).getFirstName());
+                System.out.println("Thread №2 " + forThread.get(i).getFirstName());
             }
         });
 
         thread1.start();
         thread2.start();
-        thread3.start();
     }
 
     @SneakyThrows
-    public synchronized void studentThreadSynchronizedJoin () {
-        List <StudentDto> forThread = getAllStudentsSortedByName();
+    public synchronized void studentThreadSynchronizedJoin() {
+        List<StudentDto> forThread = getAllStudentsSortedByName();
         for (StudentDto s : forThread) {
-            System.out.println(s.getFirstName() );
+            System.out.println(s.getFirstName());
         }
-        int countForThread  = forThread.size() /3;
+        int countForThread = forThread.size() / 3;
 
-        Thread thread1 = new Thread(() -> {
             for (int i = 0; i < countForThread; i++) {
 
-                System.out.println("Thread №1 " + forThread.get(i).getFirstName());
-                try { Thread.sleep(10); } catch (InterruptedException e) { e.printStackTrace(); }
-            }
-        });
+                System.out.println("Thread main " + forThread.get(i).getFirstName());
+        }
 
-        Thread thread2 = new Thread (() -> {
+        Thread thread1 = new Thread(() -> {
             for (int i = countForThread; i < countForThread * 2; i++) {
 
-                System.out.println("Thread №2 " + forThread.get(i).getFirstName());
-                try { Thread.sleep(10); } catch (InterruptedException e) { e.printStackTrace(); }
+                System.out.println("Thread №1 " + forThread.get(i).getFirstName());
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
-        Thread thread3 = new Thread(() -> {
+        Thread thread2 = new Thread(() -> {
             for (int i = countForThread * 2; i < countForThread * 3; i++) {
 
-                System.out.println("Thread №3 " + forThread.get(i).getFirstName());
+                System.out.println("Thread №2 " + forThread.get(i).getFirstName());
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
@@ -296,25 +294,27 @@ public class StudentService {
 
         thread2.start();
         thread2.join();
-
-        thread3.start();
-        thread3.join();
     }
 
-    public synchronized void studentThreadSynchronizedObject () {
-        List <StudentDto> forThread = getAllStudentsSortedByName();
+    public synchronized void studentThreadSynchronizedObject() {
+        List<StudentDto> forThread = getAllStudentsSortedByName();
 
         for (StudentDto s : forThread) {
-            System.out.println(s.getFirstName() );
+            System.out.println(s.getFirstName());
         }
 
-        int countForThread  = forThread.size() /3;
+        int countForThread = forThread.size() / 3;
 
         Object lock = new Object();
 
+                for (int i = 0; i < countForThread; i++) {
+
+                    System.out.println("Thread main " + forThread.get(i).getFirstName());
+        }
+
         Thread thread1 = new Thread(() -> {
             synchronized (lock) {
-                for (int i = 0; i < countForThread; i++) {
+                for (int i = countForThread; i < countForThread * 2; i++) {
 
                     System.out.println("Thread №1 " + forThread.get(i).getFirstName());
                     try {
@@ -326,9 +326,9 @@ public class StudentService {
             }
         });
 
-        Thread thread2 = new Thread (() -> {
+        Thread thread2 = new Thread(() -> {
             synchronized (lock) {
-                for (int i = countForThread; i < countForThread * 2; i++) {
+                for (int i = countForThread * 2; i < countForThread * 3; i++) {
 
                     System.out.println("Thread №2 " + forThread.get(i).getFirstName());
                     try {
@@ -340,23 +340,8 @@ public class StudentService {
             }
         });
 
-        Thread thread3 = new Thread(() -> {
-            synchronized (lock) {
-                for (int i = countForThread * 2; i < countForThread * 3; i++) {
-
-                    System.out.println("Thread №3 " + forThread.get(i).getFirstName());
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-
         thread1.start();
         thread2.start();
-        thread3.start();
 
     }
 }

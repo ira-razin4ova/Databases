@@ -110,4 +110,22 @@ public class StudentController {
     public ResponseEntity<List<StudentDto>> getStudentLimit() {
         return ResponseEntity.ok(studentService.getStudentLimitFiveSortedDesc());
     }
+
+    @GetMapping("/print-parallel")
+    public ResponseEntity<Void> studentThread() {
+        studentService.studentThread();
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/print-synchronized")
+    public ResponseEntity<Void> studentThreadSynchronizedJoin() {
+        studentService.studentThreadSynchronizedJoin();
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/print-synchronized-two")
+    public ResponseEntity<Void> studentThreadSynchronizedObject() {
+        studentService.studentThreadSynchronizedObject();
+        return ResponseEntity.ok().build();
+    }
 }

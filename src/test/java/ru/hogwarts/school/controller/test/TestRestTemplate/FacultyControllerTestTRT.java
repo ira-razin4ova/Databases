@@ -9,13 +9,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import ru.hogwarts.school.controller.FacultyController;
-import ru.hogwarts.school.dto.faculty.CreateFacultyDto;
-import ru.hogwarts.school.dto.faculty.FacultyDto;
-import ru.hogwarts.school.model.Faculty;
-import ru.hogwarts.school.repository.FacultyRepository;
+import ru.hogwarts.school.faculty.Faculty;
+import ru.hogwarts.school.faculty.FacultyController;
+import ru.hogwarts.school.faculty.dto.CreateFacultyDto;
+import ru.hogwarts.school.faculty.dto.FacultyDto;
+import ru.hogwarts.school.faculty.FacultyRepository;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class FacultyControllerTestTRT {

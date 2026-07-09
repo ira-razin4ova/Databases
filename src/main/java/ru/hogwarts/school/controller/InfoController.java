@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.hogwarts.school.service.StudentService;
+import ru.hogwarts.school.user.UserService;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InfoController {
 
-    private final StudentService studentService;
+    private final UserService userService;
 
     @Value("${server.port:port.default-8080}")
     private String servicePort;
@@ -27,21 +27,6 @@ public class InfoController {
 
     @GetMapping("/studentsSteamSorted")
     public ResponseEntity<List<String>> getStudentsSteamSorted(@RequestParam String sortedLetter) {
-        return ResponseEntity.ok(studentService.studentsSteamSorted(sortedLetter));
-    }
-
-    @GetMapping("/getAverageAge")
-    public ResponseEntity<Double> getAverageAge() {
-        return ResponseEntity.ok(studentService.getAverageAge());
-    }
-
-    @GetMapping("/getLongestFacultyName")
-    public ResponseEntity<String> getLongestFacultyName() {
-        return ResponseEntity.ok(studentService.getLongestFacultyName());
-    }
-
-    @GetMapping("/sum")
-    public ResponseEntity<Long> getSum() {
-        return ResponseEntity.ok(studentService.getSumOptimization());
+        return ResponseEntity.ok(userService.usersSteamSorted(sortedLetter));
     }
 }

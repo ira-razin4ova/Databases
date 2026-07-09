@@ -1,18 +1,18 @@
 -- Получить всех студентов, возраст которых находится между 10 и 20
-SELECT * FROM student
+SELECT * FROM user
 WHERE age BETWEEN 10 and 20;
 
 -- Получить всех студентов, но отобразить только список их имен
-SELECT name FROM student;
+SELECT first_name FROM user;
 
 -- Получить всех студентов, у которых в имени присутствует буква О
-SELECT * FROM student
-WHERE name LIKE '%О%';
+SELECT * FROM user
+WHERE first_name LIKE '%О%';
 
 -- Получить всех студентов, у которых возраст меньше идентификатора
-SELECT * FROM student
+SELECT * FROM user
 WHERE age < 19;
 
 -- Получить всех студентов упорядоченных по возрасту
-SELECT * FROM student
+SELECT * FROM user
 ORDER BY age;

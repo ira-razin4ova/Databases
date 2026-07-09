@@ -10,16 +10,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.hogwarts.school.controller.FacultyController;
-import ru.hogwarts.school.dto.avatar.AvatarDto;
-import ru.hogwarts.school.dto.faculty.CreateFacultyDto;
-import ru.hogwarts.school.dto.faculty.FacultyDto;
-import ru.hogwarts.school.dto.student.CreateStudentDto;
-import ru.hogwarts.school.dto.student.StudentDto;
-import ru.hogwarts.school.model.Faculty;
-import ru.hogwarts.school.model.Student;
-import ru.hogwarts.school.constant.StudentStatus;
-import ru.hogwarts.school.service.FacultyService;
+import ru.hogwarts.school.user.enums.Status;
+import ru.hogwarts.school.faculty.Faculty;
+import ru.hogwarts.school.faculty.FacultyController;
+import ru.hogwarts.school.avatar.dto.AvatarDto;
+import ru.hogwarts.school.faculty.dto.CreateFacultyDto;
+import ru.hogwarts.school.faculty.dto.FacultyDto;
+import ru.hogwarts.school.user.dto.UserDto;
+import ru.hogwarts.school.user.User;
+import ru.hogwarts.school.faculty.FacultyService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -47,8 +46,8 @@ public class FacultyControllerTestWMT {
     @MockitoBean
     private FacultyDto facultyDto;
 
-    private List<Student> studentsTest;
-    private List<StudentDto> studentDtosTest;
+    private List<User> studentsTest;
+    private List<UserDto> userDtosTest;
     private List<Faculty> facultyTest;
     private List<FacultyDto> facultyDtoList;
 
@@ -66,22 +65,22 @@ public class FacultyControllerTestWMT {
                 new FacultyDto(4L, "Математика", "Белый", new BigDecimal("50000.00"))
         );
 
-        Student student1 = new Student(1L, "Артём", "Смирнов", 23, faculty1, StudentStatus.ACTIVE);
-        Student student2 = new Student(2L, "Мария", "Зайцева", 20, faculty1, StudentStatus.ACTIVE);
-        Student student3 = new Student(3L, "Марат", "Афонин", 18, faculty1, StudentStatus.ACTIVE);
-        Student student4 = new Student(4L, "Михаил", "Башаров", 19, null, StudentStatus.ACTIVE);
+        User user1 = new User(1L, "Артём", "Смирнов", 23, faculty1, Status.ACTIVE);
+        User user2 = new User(2L, "Мария", "Зайцева", 20, faculty1, Status.ACTIVE);
+        User user3 = new User(3L, "Марат", "Афонин", 18, faculty1, Status.ACTIVE);
+        User user4 = new User(4L, "Михаил", "Башаров", 19, null, Status.ACTIVE);
 
-        studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4));
+        studentsTest = new ArrayList<>(List.of(user1, user2, user3, user4));
 
-        AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", student1.getId());
+        AvatarDto avatarDto = new AvatarDto(null, "fail.path", "path.preview", user1.getId());
 
-        StudentDto sDto1 = new StudentDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160678", "123-456",1);
-        StudentDto sDto2 = new StudentDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160679", "123-457",1);
-        StudentDto sDto3 = new StudentDto(3L, 18, "Марат", "Измалков", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160680", "123-458",1);
-        StudentDto sDto4 = new StudentDto(4L, 18, "Софья", "Афонина", "Химия", avatarDto, StudentStatus.ACTIVE, "79536160681", "123-459",1);
-        StudentDto sDto5 = new StudentDto(5L, 19, "Михаил", "Бачурин", null, avatarDto, StudentStatus.ACTIVE, "79536160682", "123-460",1);
+        UserDto sDto1 = new UserDto(1L, 23, "Артём", "Смирнов", "Химия", avatarDto, Status.ACTIVE, "79536160678", "123-456",1, "Актный");
+        UserDto sDto2 = new UserDto(2L, 20, "Мария", "Леонова", "Химия", avatarDto, Status.ACTIVE, "79536160679", "123-457",1, "Актный");
+        UserDto sDto3 = new UserDto(3L, 18, "Марат", "Измалков", "Химия", avatarDto, Status.ACTIVE, "79536160680", "123-458",1, "Актный");
+        UserDto sDto4 = new UserDto(4L, 18, "Софья", "Афонина", "Химия", avatarDto, Status.ACTIVE, "79536160681", "123-459",1, "Актный");
+        UserDto sDto5 = new UserDto(5L, 19, "Михаил", "Бачурин", null, avatarDto, Status.ACTIVE, "79536160682", "123-460",1, "Актный");
 
-        studentDtosTest = new ArrayList<>(List.of(sDto1, sDto2, sDto3, sDto4, sDto5));
+        userDtosTest = new ArrayList<>(List.of(sDto1, sDto2, sDto3, sDto4, sDto5));
 
     }
 
@@ -205,7 +204,7 @@ public class FacultyControllerTestWMT {
 
         Faculty testFaculty = facultyTest.get(0);
 
-        List<StudentDto> expectedStudent = studentDtosTest.stream()
+        List<UserDto> expectedStudent = userDtosTest.stream()
                 .filter(s -> s.getFaculty() != null && s.getFaculty().equals(testFaculty.getId()))
                 .toList();
         when(facultyService.studentsFacultyById(testFaculty.getId())).thenReturn(expectedStudent);

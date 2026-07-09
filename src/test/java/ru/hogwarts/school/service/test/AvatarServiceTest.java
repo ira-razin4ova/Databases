@@ -21,19 +21,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
-import ru.hogwarts.school.constant.StudentStatus;
-import ru.hogwarts.school.dto.avatar.AvatarDto;
-import ru.hogwarts.school.exception.ValidationException;
-import ru.hogwarts.school.exception.EntityNotFoundException;
-import ru.hogwarts.school.mapper.AvatarMapper;
-import ru.hogwarts.school.model.Avatar;
-import ru.hogwarts.school.model.Faculty;
-import ru.hogwarts.school.model.Student;
-import ru.hogwarts.school.repository.AvatarRepository;
-import ru.hogwarts.school.repository.FacultyRepository;
-import ru.hogwarts.school.repository.StudentRepository;
-import ru.hogwarts.school.service.AvatarService;
-import ru.hogwarts.school.service.StudentService;
+import ru.hogwarts.school.user.enums.Status;
+import ru.hogwarts.school.avatar.dto.AvatarDto;
+import ru.hogwarts.school.exception.badrequest.ValidationException;
+import ru.hogwarts.school.exception.notfound.EntityNotFoundException;
+import ru.hogwarts.school.avatar.AvatarMapper;
+import ru.hogwarts.school.avatar.Avatar;
+import ru.hogwarts.school.faculty.Faculty;
+import ru.hogwarts.school.user.User;
+import ru.hogwarts.school.avatar.AvatarRepository;
+import ru.hogwarts.school.faculty.FacultyRepository;
+import ru.hogwarts.school.user.UserRepository;
+import ru.hogwarts.school.avatar.AvatarService;
+import ru.hogwarts.school.user.UserService;
 
 import javax.imageio.ImageIO;
 
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class AvatarServiceTest {
     @Mock
-    private StudentRepository studentRepository;
+    private UserRepository userRepository;
 
     @Mock
     private FacultyRepository facultyRepository;
@@ -53,7 +53,7 @@ public class AvatarServiceTest {
     private AvatarRepository avatarRepository;
 
     @Mock
-    private StudentService studentService;
+    private UserService userService;
 
     @Mock
     private AvatarMapper avatarMapper;
@@ -65,7 +65,7 @@ public class AvatarServiceTest {
     private MockMultipartFile illegalFile;
     private MockMultipartFile nullTypeFile;
     private Path tempDir;
-    private List<Student> studentsTest;
+    private List<User> studentsTest;
     private List<Faculty> facultyTest;
     private AvatarDto dto;
     private Avatar avatar;
@@ -91,11 +91,11 @@ public class AvatarServiceTest {
         Faculty faculty1 = new Faculty(1L, "Химия", "Красный");
         facultyTest = new ArrayList<>(List.of(faculty1));
 
-        Student student1 = new Student(1L, "Артём", "Смирнов", 23, faculty1, StudentStatus.ACTIVE);
-        Student student2 = new Student(2L, "Мария","Леонова", 20, faculty1, StudentStatus.ACTIVE);
-        Student student3 = new Student(3L, "Марат", "Измалков",18, faculty1, StudentStatus.ACTIVE);
-        Student student4 = new Student(4L, "Софья", "Афонина", 18, faculty1, StudentStatus.ACTIVE);
-        studentsTest = new ArrayList<>(List.of(student1, student2, student3, student4));
+        User user1 = new User(1L, "Артём", "Смирнов", 23, faculty1, Status.ACTIVE);
+        User user2 = new User(2L, "Мария","Леонова", 20, faculty1, Status.ACTIVE);
+        User user3 = new User(3L, "Марат", "Измалков",18, faculty1, Status.ACTIVE);
+        User user4 = new User(4L, "Софья", "Афонина", 18, faculty1, Status.ACTIVE);
+        studentsTest = new ArrayList<>(List.of(user1, user2, user3, user4));
 
         dto = new AvatarDto(
                 1L,
@@ -180,13 +180,13 @@ public class AvatarServiceTest {
     @Test
     void uploadAvatarFullSuccessTest() throws IOException {
 
-        Student testStudent = studentsTest.get(0);
+        User testUser = studentsTest.get(0);
 
 
-        when(studentService.getStudentOrThrow(1L))
-                .thenReturn(testStudent);
+        when(userService.getUserOrThrow(1L))
+                .thenReturn(testUser);
 
-        when(avatarRepository.findByStudentId(1L))
+        when(avatarRepository.findByUserId(1L))
                 .thenReturn(Optional.empty());
 
         when(avatarRepository.save(any(Avatar.class)))
@@ -195,7 +195,7 @@ public class AvatarServiceTest {
         when(avatarMapper.toDto(any(Avatar.class)))
                 .thenReturn(dto);
 
-        AvatarDto result = avatarService.uploadAvatar(testStudent.getId(), validImage);
+        AvatarDto result = avatarService.uploadAvatar(testUser.getId(), validImage);
 
         assertNotNull(result);
 
@@ -217,9 +217,9 @@ public class AvatarServiceTest {
 
     @Test
     void uploadAvatarNullFileTest() {
-        Student testStudent = studentsTest.get(0);
+        User testUser = studentsTest.get(0);
 
-        when(studentService.getStudentOrThrow(testStudent.getId())).thenReturn(testStudent);
+        when(userService.getUserOrThrow(testUser.getId())).thenReturn(testUser);
 
         ValidationException exception = assertThrows(ValidationException.class, () ->
                 avatarService.uploadAvatar(1L, nullTypeFile));
@@ -229,10 +229,10 @@ public class AvatarServiceTest {
 
     @Test
     void findAvatarById() {
-        Student testStudent = studentsTest.get(0);
+        User testUser = studentsTest.get(0);
         Avatar expectedAvatar = new Avatar();
         expectedAvatar.setId(10L);
-        expectedAvatar.setStudent(testStudent);
+        expectedAvatar.setStudent(testUser);
 
         when(avatarRepository.findById(10L)).thenReturn(Optional.of(expectedAvatar));
 
@@ -244,34 +244,34 @@ public class AvatarServiceTest {
 
     @Test
     void findAvatarByIdStudent() {
-        Student testStudent = studentsTest.get(0);
+        User testUser = studentsTest.get(0);
         Avatar expectedAvatar = new Avatar();
         expectedAvatar.setId(1L);
-        expectedAvatar.setStudent(testStudent);
-        testStudent.setAvatar(expectedAvatar);
+        expectedAvatar.setStudent(testUser);
+        testUser.setAvatar(expectedAvatar);
 
-        when(avatarRepository.findByStudentId(testStudent.getId())).thenReturn(Optional.of(expectedAvatar));
+        when(avatarRepository.findByUserId(testUser.getId())).thenReturn(Optional.of(expectedAvatar));
         when(avatarMapper.toDto(any(Avatar.class)))
                 .thenReturn(dto);
 
-        AvatarDto result = avatarService.findAvatarIdStudent(testStudent.getId());
+        AvatarDto result = avatarService.findAvatarIdUser(testUser.getId());
 
         assertNotNull(result);
         assertEquals(1L, result.getId(), "ID аватара должен быть 1");
-       assertEquals(testStudent.getId(), result.getStudentId(), "Это должен быть аватар нашего студента");
-        assertEquals(testStudent.getAvatar().getId(), result.getId());
+       assertEquals(testUser.getId(), result.getStudentId(), "Это должен быть аватар нашего студента");
+        assertEquals(testUser.getAvatar().getId(), result.getId());
     }
 
     @Test
     void findAvatarByIdStudentNull() {
-        Student testStudent = studentsTest.get(0);
+        User testUser = studentsTest.get(0);
 
-        when(avatarRepository.findByStudentId(testStudent.getId())).thenReturn(Optional.empty());
+        when(avatarRepository.findByUserId(testUser.getId())).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () ->
-                avatarService.findAvatarIdStudent(testStudent.getId()));
+                avatarService.findAvatarIdUser(testUser.getId()));
 
-        verify(avatarRepository, times(1)).findByStudentId(testStudent.getId());
+        verify(avatarRepository, times(1)).findByUserId(testUser.getId());
     }
 
 

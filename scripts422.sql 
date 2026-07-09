@@ -1,10 +1,10 @@
 -- 1.1  Возраст студента не может быть меньше 16 лет.
 
-ALTER TABLE student ADD CONSTRAINT age_must_be_at_last (age > 16);
+ALTER TABLE user ADD CONSTRAINT age_must_be_at_last (age > 16);
 
 -- 1.2 Имена студентов должны быть уникальными и не равны нулю.
 
-ALTER TABLE student
+ALTER TABLE user
 ADD CONSTRAINT name_unique UNIQUE (last_name),
 ALTER COLUM last_name SET NOT NULL;
 
@@ -16,7 +16,7 @@ ADD CONSTRAINT color_unique UNIQUE (color);
 
 -- 1.4 При создании студента без возраста ему автоматически должно присваиваться 20 лет.
 
-ALTER TABLE student
+ALTER TABLE user
 ALTER COLUMN age SET DEFAULT 20;
 
 -- 2 Проектирование таблиц.
@@ -38,12 +38,12 @@ driver_id SERIAL REFERENCES car (id));
 
 -- 3.1 Составить первый JOIN-запрос, чтобы получить информацию обо всех студентах, вместе с названиями факультетов.
 SELECT
-student.last_name,
-student.first_name,
-student.age,
+user.last_name,
+user.first_name,
+user.age,
 faculty.name
-FROM student
-INNER JOIN faculty ON student.faculty_id = faculty.id;
+FROM user
+INNER JOIN faculty ON user.faculty_id = faculty.id;
 
 -- Так же можно так
 
@@ -52,7 +52,7 @@ s.last_name,
 s.first_name,
 s.age, s.faculty_id,
 f.name AS faculty_name
-FROM public.student AS s
+FROM public.user AS s
 INNER join faculty f on s.faculty_id = f.id
 
 -- 3.2 Составить второй JOIN-запрос, чтобы получить только тех студентов, у которых есть аватарки.
@@ -64,13 +64,13 @@ s.last_name as last_name,
 s.first_name,
 s.age
 FROM public.avatar AS a
-INNER join student s on a.student_id  = s.id
+INNER join user s on a.student_id  = s.id
 
 SELECT avatar.id,
 avatar.file_path_preview,
 avatar.media_type,
-student.last_name,
-student.first_name,
-student.age
+user.last_name,
+user.first_name,
+user.age
 from avatar
-left join  student on avatar.student_id  = student.id
+left join  user on avatar.student_id  = user.id

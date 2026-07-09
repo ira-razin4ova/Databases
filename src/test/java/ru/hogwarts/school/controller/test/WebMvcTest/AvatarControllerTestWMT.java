@@ -8,14 +8,14 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
-import ru.hogwarts.school.controller.AvatarController;
-import ru.hogwarts.school.dto.avatar.AvatarDto;
-import ru.hogwarts.school.model.Avatar;
-import ru.hogwarts.school.model.Faculty;
-import ru.hogwarts.school.model.Student;
-import ru.hogwarts.school.constant.StudentStatus;
-import ru.hogwarts.school.service.AvatarService;
-import ru.hogwarts.school.service.StudentService;
+import ru.hogwarts.school.avatar.AvatarController;
+import ru.hogwarts.school.avatar.dto.AvatarDto;
+import ru.hogwarts.school.avatar.Avatar;
+import ru.hogwarts.school.faculty.Faculty;
+import ru.hogwarts.school.user.User;
+import ru.hogwarts.school.user.enums.Status;
+import ru.hogwarts.school.avatar.AvatarService;
+import ru.hogwarts.school.user.UserService;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -37,7 +37,7 @@ public class AvatarControllerTestWMT {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private StudentService studentService;
+    private UserService userService;
 
     @MockitoBean
     private AvatarService avatarService;
@@ -59,7 +59,7 @@ public class AvatarControllerTestWMT {
 
     Faculty facultyTest = new Faculty(1L, "Химия", "Красный");
 
-    Student studentTest = new Student(1L, "Артём", "Смирнов", 23, facultyTest, StudentStatus.ACTIVE);
+    User userTest = new User(1L, "Артём", "Смирнов", 23, facultyTest, Status.ACTIVE);
 
 
    @Test
@@ -72,10 +72,10 @@ public class AvatarControllerTestWMT {
                 1L
         );
 
-        when(avatarService.uploadAvatar(eq(studentTest.getId()), any(MultipartFile.class)))
+        when(avatarService.uploadAvatar(eq(userTest.getId()), any(MultipartFile.class)))
                 .thenReturn(dto);
 
-        mockMvc.perform(multipart("/avatars/" + studentTest.getId() + "/upload")
+        mockMvc.perform(multipart("/avatars/" + userTest.getId() + "/upload")
                         .file(validImage))
                 .andExpect(status().isCreated()); // если ты поменяла на CREATED
     }
@@ -90,7 +90,7 @@ public class AvatarControllerTestWMT {
                 1L
         );
 
-        when(avatarService.findAvatarIdStudent(studentTest.getId())).thenReturn(dto);
+        when(avatarService.findAvatarIdUser(userTest.getId())).thenReturn(dto);
 
         mockMvc.perform(get("/avatars/student/" + 1L))
                 .andExpect(status().isOk())
